@@ -1,0 +1,11 @@
+# Ensure consistent line endings across all OS
+* text=auto
+
+# Specific types
+*.ts text
+*.tsx text
+*.js text
+*.css text
+*.html text
+*.json text
+*.md text
