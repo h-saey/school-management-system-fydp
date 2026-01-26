@@ -4,6 +4,7 @@ import path from "path";
 
 export default defineConfig({
   plugins: [react()],
+  base: "/school-management-system-fydp/",
   resolve: {
     extensions: [".js", ".jsx", ".ts", ".tsx", ".json"],
     alias: {
@@ -57,5 +58,4 @@ export default defineConfig({
     port: 3000,
     open: true,
   },
-  base: "/school-management-system-fydp/",
 });
