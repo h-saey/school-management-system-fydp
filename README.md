@@ -1,26 +1,24 @@
-<<<<<<< HEAD
-# School Management System – FYDP 
+# School Management System – FYDP
 
-## Description
-This repository contains the prototype of the **School Management System**, developed as a **Final Year Design Project (FYDP)** for BSIT/BSCS (Session 2022–2026).
+## Project Overview
 
-The project demonstrates a role-based system with separate dashboards for students, parents, teachers, and administrators.
+This repository contains the Final Year Design Project (FYDP)
+for a School Management System.
 
-## Team Members
-- Saiha Atiq (BCS22007)  
-- Malaika Ashraf (BCS22015) 
-- Khadija Mustafa (BCS22043) 
-- Zainab Khawaja (BCS22049)  
-=======
+## Current Phase
 
-  # School Management System (Community)
+✔ Frontend Prototype completed  
+⏳ Backend under development
 
-  This is a code bundle for School Management System (Community). The original project is available at https://www.figma.com/design/muGRK02nBu2BS8fKl9s8UQ/School-Management-System--Community-.
+## Repository Structure
 
-  ## Running the code
+- src/frontend → Frontend prototype (Vite-based)
+- src/backend → Backend (to be implemented)
+- docs → Project documentation
+- assets → Screenshots and diagrams
 
-  Run `npm i` to install the dependencies.
+## How to Run Frontend Prototype
 
-  Run `npm run dev` to start the development server.
-  
->>>>>>> b8fd2d8 (Add .gitattributes + .gitignore and normalize line endings+ git add.)
+cd src/frontend
+npm install
+npm run dev

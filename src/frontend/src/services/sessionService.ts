@@ -232,10 +232,19 @@ class SessionService {
   }
 
   // Check if user has been inactive for too long
+  // private isInactive(): boolean {
+  //   const last =
+  //     this.lastActivityTime ||
+  //     new Date(localStorage.getItem(LAST_ACTIVITY_KEY) || 0).getTime();
+  //   return Date.now() - last > SESSION_TIMEOUT;
+  // }
   private isInactive(): boolean {
+    if (!localStorage.getItem(SESSION_KEY)) return true;
+
     const last =
       this.lastActivityTime ||
       new Date(localStorage.getItem(LAST_ACTIVITY_KEY) || 0).getTime();
+
     return Date.now() - last > SESSION_TIMEOUT;
   }
 
@@ -265,15 +274,58 @@ class SessionService {
   }
 
   private handleUserActivity = (): void => {
-    const session = this.getSession();
-    if (session) {
+    if (localStorage.getItem(SESSION_KEY)) {
       this.updateLastActivity();
     }
   };
 
+  // private handleUserActivity = (): void => {
+  //   const session = this.getSession();
+  //   if (session) {
+  //     this.updateLastActivity();
+  //   }
+  // };
+
   // End session and cleanup
+  // endSession(): void {
+  //   const session = this.getSession();
+  //   if (session) {
+  //     dataService.createAuditLog({
+  //       userId: session.user.id,
+  //       userRole: session.user.role,
+  //       action: "logout",
+  //       entityType: "User",
+  //       details: "User session ended",
+  //       timestamp: new Date().toISOString(),
+  //     });
+  //   }
+
+  //   localStorage.removeItem(SESSION_KEY);
+  //   localStorage.removeItem(LAST_ACTIVITY_KEY);
+
+  //   if (this.activityTimer) {
+  //     clearInterval(this.activityTimer);
+  //     this.activityTimer = null;
+  //   }
+
+  //   if (this.listenersAdded) {
+  //     const events = ["mousedown", "keydown", "scroll", "touchstart", "click"];
+  //     events.forEach((event) => {
+  //       document.removeEventListener(event, this.handleUserActivity);
+  //     });
+  //     this.listenersAdded = false;
+  //   }
+  // }
   endSession(): void {
-    const session = this.getSession();
+    const sessionData = localStorage.getItem(SESSION_KEY);
+    let session: Session | null = null;
+
+    if (sessionData) {
+      try {
+        session = JSON.parse(sessionData);
+      } catch {}
+    }
+
     if (session) {
       dataService.createAuditLog({
         userId: session.user.id,
@@ -295,9 +347,9 @@ class SessionService {
 
     if (this.listenersAdded) {
       const events = ["mousedown", "keydown", "scroll", "touchstart", "click"];
-      events.forEach((event) => {
-        document.removeEventListener(event, this.handleUserActivity);
-      });
+      events.forEach((event) =>
+        document.removeEventListener(event, this.handleUserActivity),
+      );
       this.listenersAdded = false;
     }
   }
