@@ -59,7 +59,7 @@
     "dev": "vite",
     "build": "vite build",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist"
+    "deploy": "gh-pages -d build"
   },
   "homepage": "https://h-saey.github.io/school-management-system-fydp"
 }
