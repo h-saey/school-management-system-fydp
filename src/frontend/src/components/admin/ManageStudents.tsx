@@ -1,22 +1,68 @@
-import React, { useState } from 'react';
-import { Users, Plus, Edit, Trash2, Search } from 'lucide-react';
+import React, { useState } from "react";
+import { Users, Plus, Edit, Trash2, Search } from "lucide-react";
 
 export function ManageStudents() {
   const [showAddForm, setShowAddForm] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
 
   const students = [
-    { id: 1, rollNo: '001', name: 'Aarav Patel', class: 'Class 10-A', section: 'A', dob: '2010-05-15', parent: 'Mr. Patel', phone: '9876543210' },
-    { id: 2, rollNo: '002', name: 'Aadhya Sharma', class: 'Class 10-A', section: 'A', dob: '2010-06-20', parent: 'Mrs. Sharma', phone: '9876543211' },
-    { id: 3, rollNo: '003', name: 'Advait Kumar', class: 'Class 10-A', section: 'A', dob: '2010-04-10', parent: 'Mr. Kumar', phone: '9876543212' },
-    { id: 4, rollNo: '004', name: 'Ananya Singh', class: 'Class 9-B', section: 'B', dob: '2011-07-25', parent: 'Mrs. Singh', phone: '9876543213' },
-    { id: 5, rollNo: '005', name: 'Arjun Reddy', class: 'Class 9-B', section: 'B', dob: '2011-03-12', parent: 'Mr. Reddy', phone: '9876543214' }
+    {
+      id: 1,
+      rollNo: "001",
+      name: "Aarav Patel",
+      class: "Class 10-A",
+      section: "A",
+      dob: "2010-05-15",
+      parent: "Mr. Patel",
+      phone: "9876543210",
+    },
+    {
+      id: 2,
+      rollNo: "002",
+      name: "Aadhya Sharma",
+      class: "Class 10-A",
+      section: "A",
+      dob: "2010-06-20",
+      parent: "Mrs. Sharma",
+      phone: "9876543211",
+    },
+    {
+      id: 3,
+      rollNo: "003",
+      name: "Advait Kumar",
+      class: "Class 10-A",
+      section: "A",
+      dob: "2010-04-10",
+      parent: "Mr. Kumar",
+      phone: "9876543212",
+    },
+    {
+      id: 4,
+      rollNo: "004",
+      name: "Ananya Singh",
+      class: "Class 9-B",
+      section: "B",
+      dob: "2011-07-25",
+      parent: "Mrs. Singh",
+      phone: "9876543213",
+    },
+    {
+      id: 5,
+      rollNo: "005",
+      name: "Arjun Reddy",
+      class: "Class 9-B",
+      section: "B",
+      dob: "2011-03-12",
+      parent: "Mr. Reddy",
+      phone: "9876543214",
+    },
   ];
 
-  const filteredStudents = students.filter(student =>
-    student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    student.rollNo.includes(searchTerm) ||
-    student.class.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredStudents = students.filter(
+    (student) =>
+      student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      student.rollNo.includes(searchTerm) ||
+      student.class.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   return (
@@ -24,13 +70,15 @@ export function ManageStudents() {
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-gray-900 mb-2">Manage Students</h1>
-          <p className="text-gray-600">Add, update, and manage student profiles</p>
+          <p className="text-gray-600">
+            Add, update, and manage student profiles
+          </p>
         </div>
         <button
           onClick={() => setShowAddForm(!showAddForm)}
           className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-4 h-4 sm:block md:block" />
           Add New Student
         </button>
       </div>
@@ -82,7 +130,9 @@ export function ManageStudents() {
               />
             </div>
             <div>
-              <label className="block text-gray-700 mb-2">Parent/Guardian Name</label>
+              <label className="block text-gray-700 mb-2">
+                Parent/Guardian Name
+              </label>
               <input
                 type="text"
                 placeholder="Enter parent name"
@@ -143,11 +193,86 @@ export function ManageStudents() {
         <div className="p-6 border-b">
           <div className="flex items-center gap-3">
             <Users className="w-6 h-6 text-red-600" />
-            <h2 className="text-gray-900">Student List ({filteredStudents.length})</h2>
+            <h2 className="text-gray-900">
+              Student List ({filteredStudents.length})
+            </h2>
           </div>
         </div>
-        
+
         <div className="overflow-x-auto">
+          <table className="w-full min-w-[800px]">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-4 text-left text-gray-700 whitespace-nowrap">
+                  Roll No
+                </th>
+                <th className="px-6 py-4 text-left text-gray-700 whitespace-nowrap">
+                  Name
+                </th>
+                <th className="px-6 py-4 text-left text-gray-700 whitespace-nowrap">
+                  Class
+                </th>
+                <th className="px-6 py-4 text-left text-gray-700 whitespace-nowrap">
+                  Section
+                </th>
+                <th className="px-6 py-4 text-left text-gray-700 whitespace-nowrap">
+                  DOB
+                </th>
+                <th className="px-6 py-4 text-left text-gray-700 whitespace-nowrap">
+                  Parent
+                </th>
+                <th className="px-6 py-4 text-left text-gray-700 whitespace-nowrap">
+                  Contact
+                </th>
+                <th className="px-6 py-4 text-left text-gray-700 whitespace-nowrap">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+
+            <tbody className="divide-y divide-gray-200">
+              {filteredStudents.map((student) => (
+                <tr key={student.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 text-gray-700 whitespace-nowrap">
+                    {student.rollNo}
+                  </td>
+                  <td className="px-6 py-4 text-gray-900 whitespace-nowrap">
+                    {student.name}
+                  </td>
+                  <td className="px-6 py-4 text-gray-700 whitespace-nowrap">
+                    {student.class}
+                  </td>
+                  <td className="px-6 py-4 text-gray-700 whitespace-nowrap">
+                    {student.section}
+                  </td>
+                  <td className="px-6 py-4 text-gray-700 whitespace-nowrap">
+                    {student.dob}
+                  </td>
+                  <td className="px-6 py-4 text-gray-700 whitespace-nowrap">
+                    {student.parent}
+                  </td>
+                  <td className="px-6 py-4 text-gray-700 whitespace-nowrap">
+                    {student.phone}
+                  </td>
+
+                  <td className="px-6 py-4">
+                    <div className="flex gap-2">
+                      <button className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                        <Edit className="w-4 h-4" />
+                      </button>
+
+                      <button className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gray-50">
               <tr>
@@ -185,7 +310,7 @@ export function ManageStudents() {
               ))}
             </tbody>
           </table>
-        </div>
+        </div> */}
       </div>
     </div>
   );

@@ -1,39 +1,101 @@
-import React, { useState } from 'react';
-import { MessageSquare, Send, User, Clock } from 'lucide-react';
+import React, { useState } from "react";
+import { MessageSquare, Send, User, Clock } from "lucide-react";
 
 export function CommunicationHub() {
   const [selectedTeacher, setSelectedTeacher] = useState<string | null>(null);
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
 
   const teachers = [
-    { id: '1', name: 'Mr. Kumar', subject: 'Mathematics', lastMessage: '2 hours ago' },
-    { id: '2', name: 'Dr. Singh', subject: 'Science', lastMessage: '1 day ago' },
-    { id: '3', name: 'Mrs. Sharma', subject: 'English', lastMessage: '3 days ago' },
-    { id: '4', name: 'Mr. Patel', subject: 'History', lastMessage: '5 days ago' }
+    {
+      id: "1",
+      name: "Mr. Kumar",
+      subject: "Mathematics",
+      lastMessage: "2 hours ago",
+    },
+    {
+      id: "2",
+      name: "Dr. Singh",
+      subject: "Science",
+      lastMessage: "1 day ago",
+    },
+    {
+      id: "3",
+      name: "Mrs. Sharma",
+      subject: "English",
+      lastMessage: "3 days ago",
+    },
+    {
+      id: "4",
+      name: "Mr. Patel",
+      subject: "History",
+      lastMessage: "5 days ago",
+    },
   ];
 
-  const conversations: Record<string, Array<{ sender: 'parent' | 'teacher', message: string, time: string }>> = {
-    '1': [
-      { sender: 'parent', message: 'Hello Mr. Kumar, I wanted to discuss Rahul\'s performance in mathematics.', time: '10:00 AM' },
-      { sender: 'teacher', message: 'Hello Mrs. Sharma! Rahul is doing quite well. He scored 88% in the mid-term exam.', time: '10:15 AM' },
-      { sender: 'parent', message: 'That\'s great to hear! Are there any areas where he needs improvement?', time: '10:20 AM' },
-      { sender: 'teacher', message: 'He should focus more on geometry. I\'ll provide some extra practice problems.', time: '10:25 AM' }
+  const conversations: Record<
+    string,
+    Array<{ sender: "parent" | "teacher"; message: string; time: string }>
+  > = {
+    "1": [
+      {
+        sender: "parent",
+        message:
+          "Hello Mr. Kumar, I wanted to discuss Rahul's performance in mathematics.",
+        time: "10:00 AM",
+      },
+      {
+        sender: "teacher",
+        message:
+          "Hello Mrs. Sharma! Rahul is doing quite well. He scored 88% in the mid-term exam.",
+        time: "10:15 AM",
+      },
+      {
+        sender: "parent",
+        message:
+          "That's great to hear! Are there any areas where he needs improvement?",
+        time: "10:20 AM",
+      },
+      {
+        sender: "teacher",
+        message:
+          "He should focus more on geometry. I'll provide some extra practice problems.",
+        time: "10:25 AM",
+      },
     ],
-    '2': [
-      { sender: 'parent', message: 'Dr. Singh, how is Rahul performing in Science practicals?', time: 'Yesterday 2:30 PM' },
-      { sender: 'teacher', message: 'He is excellent in practicals! Very curious and follows safety protocols well.', time: 'Yesterday 3:00 PM' }
+    "2": [
+      {
+        sender: "parent",
+        message: "Dr. Singh, how is Rahul performing in Science practicals?",
+        time: "Yesterday 2:30 PM",
+      },
+      {
+        sender: "teacher",
+        message:
+          "He is excellent in practicals! Very curious and follows safety protocols well.",
+        time: "Yesterday 3:00 PM",
+      },
     ],
-    '3': [
-      { sender: 'parent', message: 'Mrs. Sharma, I noticed Rahul got B+ in English. Can you provide some guidance?', time: 'Dec 8, 4:00 PM' },
-      { sender: 'teacher', message: 'Yes, he needs to work on grammar. I recommend daily reading and writing practice.', time: 'Dec 8, 5:00 PM' }
-    ]
+    "3": [
+      {
+        sender: "parent",
+        message:
+          "Mrs. Sharma, I noticed Rahul got B+ in English. Can you provide some guidance?",
+        time: "Dec 8, 4:00 PM",
+      },
+      {
+        sender: "teacher",
+        message:
+          "Yes, he needs to work on grammar. I recommend daily reading and writing practice.",
+        time: "Dec 8, 5:00 PM",
+      },
+    ],
   };
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
     if (message.trim() && selectedTeacher) {
       // Handle sending message
-      setMessage('');
+      setMessage("");
     }
   };
 
@@ -41,7 +103,9 @@ export function CommunicationHub() {
     <div className="space-y-6">
       <div>
         <h1 className="text-gray-900 mb-2">Communication Hub</h1>
-        <p className="text-gray-600">Connect with teachers privately and securely</p>
+        <p className="text-gray-600">
+          Connect with teachers privately and securely
+        </p>
       </div>
 
       <div className="bg-white rounded-xl shadow-sm overflow-hidden">
@@ -57,7 +121,7 @@ export function CommunicationHub() {
                   key={teacher.id}
                   onClick={() => setSelectedTeacher(teacher.id)}
                   className={`w-full p-4 text-left hover:bg-gray-50 transition-colors ${
-                    selectedTeacher === teacher.id ? 'bg-green-50' : ''
+                    selectedTeacher === teacher.id ? "bg-green-50" : ""
                   }`}
                 >
                   <div className="flex items-center gap-3 mb-2">
@@ -86,11 +150,20 @@ export function CommunicationHub() {
                 <div className="p-4 border-b bg-gray-50">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center text-white">
-                      {teachers.find(t => t.id === selectedTeacher)?.name.charAt(0)}
+                      {teachers
+                        .find((t) => t.id === selectedTeacher)
+                        ?.name.charAt(0)}
                     </div>
                     <div>
-                      <h3 className="text-gray-900">{teachers.find(t => t.id === selectedTeacher)?.name}</h3>
-                      <p className="text-sm text-gray-600">{teachers.find(t => t.id === selectedTeacher)?.subject}</p>
+                      <h3 className="text-gray-900">
+                        {teachers.find((t) => t.id === selectedTeacher)?.name}
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        {
+                          teachers.find((t) => t.id === selectedTeacher)
+                            ?.subject
+                        }
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -100,19 +173,23 @@ export function CommunicationHub() {
                   {conversations[selectedTeacher]?.map((msg, index) => (
                     <div
                       key={index}
-                      className={`flex ${msg.sender === 'parent' ? 'justify-end' : 'justify-start'}`}
+                      className={`flex ${msg.sender === "parent" ? "justify-end" : "justify-start"}`}
                     >
                       <div
                         className={`max-w-[70%] rounded-lg p-4 ${
-                          msg.sender === 'parent'
-                            ? 'bg-green-600 text-white'
-                            : 'bg-gray-100 text-gray-900'
+                          msg.sender === "parent"
+                            ? "bg-green-600 text-white"
+                            : "bg-gray-100 text-gray-900"
                         }`}
                       >
                         <p>{msg.message}</p>
-                        <p className={`text-xs mt-2 ${
-                          msg.sender === 'parent' ? 'text-green-100' : 'text-gray-600'
-                        }`}>
+                        <p
+                          className={`text-xs mt-2 ${
+                            msg.sender === "parent"
+                              ? "text-green-100"
+                              : "text-gray-600"
+                          }`}
+                        >
                           {msg.time}
                         </p>
                       </div>
@@ -156,10 +233,17 @@ export function CommunicationHub() {
       <div className="bg-blue-50 border-l-4 border-blue-500 p-6 rounded-lg">
         <h3 className="text-gray-900 mb-3">Communication Guidelines</h3>
         <div className="space-y-2 text-gray-700 text-sm">
-          <p>• All conversations are private and secure between parent and teacher.</p>
-          <p>• Teachers typically respond within 24 hours during working days.</p>
+          <p>
+            • All conversations are private and secure between parent and
+            teacher.
+          </p>
+          <p>
+            • Teachers typically respond within 24 hours during working days.
+          </p>
           <p>• Please maintain professional and respectful communication.</p>
-          <p>• For urgent matters, please contact the school office directly.</p>
+          <p>
+            • For urgent matters, please contact the school office directly.
+          </p>
         </div>
       </div>
     </div>

@@ -1,65 +1,76 @@
-import React from 'react';
-import { AlertCircle, CheckCircle, Clock, MessageSquare, ThumbsUp } from 'lucide-react';
+import React from "react";
+import {
+  AlertCircle,
+  CheckCircle,
+  Clock,
+  MessageSquare,
+  ThumbsUp,
+} from "lucide-react";
 
 export function BehaviourComplaints() {
   const complaints = [
     {
-      id: 'CMP001',
-      issue: 'Unclear explanation in Chemistry class',
-      submittedBy: 'Rahul Sharma (Student)',
-      category: 'Academic',
-      status: 'Resolved',
-      date: '2025-12-05',
-      teacherResponse: 'Scheduled extra doubt session. Issue resolved. Student is now clear on the topic.',
-      resolution: 'Extra classes conducted on Dec 6 & 7. Student performed well in follow-up quiz.'
+      id: "CMP001",
+      issue: "Unclear explanation in Chemistry class",
+      submittedBy: "Rahul Sharma (Student)",
+      category: "Academic",
+      status: "Resolved",
+      date: "2025-12-05",
+      teacherResponse:
+        "Scheduled extra doubt session. Issue resolved. Student is now clear on the topic.",
+      resolution:
+        "Extra classes conducted on Dec 6 & 7. Student performed well in follow-up quiz.",
     },
     {
-      id: 'CMP002',
-      issue: 'Library book not available',
-      submittedBy: 'Rahul Sharma (Student)',
-      category: 'Facility',
-      status: 'In Progress',
-      date: '2025-12-08',
-      teacherResponse: 'Book has been ordered. Expected arrival in 1 week.',
-      resolution: null
-    }
+      id: "CMP002",
+      issue: "Library book not available",
+      submittedBy: "Rahul Sharma (Student)",
+      category: "Facility",
+      status: "In Progress",
+      date: "2025-12-08",
+      teacherResponse: "Book has been ordered. Expected arrival in 1 week.",
+      resolution: null,
+    },
   ];
 
   const behaviourRemarks = [
     {
-      date: '2025-12-10',
-      teacher: 'Mr. Kumar',
-      subject: 'Mathematics',
-      type: 'Positive',
-      remark: 'Excellent participation in class discussions. Helping other students.',
+      date: "2025-12-10",
+      teacher: "Mr. Kumar",
+      subject: "Mathematics",
+      type: "Positive",
+      remark:
+        "Excellent participation in class discussions. Helping other students.",
       icon: ThumbsUp,
-      color: 'bg-green-50 border-green-200'
+      color: "bg-green-50 border-green-200",
     },
     {
-      date: '2025-12-08',
-      teacher: 'Dr. Singh',
-      subject: 'Science',
-      type: 'Positive',
-      remark: 'Outstanding performance in science fair. Leadership skills demonstrated.',
+      date: "2025-12-08",
+      teacher: "Dr. Singh",
+      subject: "Science",
+      type: "Positive",
+      remark:
+        "Outstanding performance in science fair. Leadership skills demonstrated.",
       icon: CheckCircle,
-      color: 'bg-blue-50 border-blue-200'
+      color: "bg-blue-50 border-blue-200",
     },
     {
-      date: '2025-12-01',
-      teacher: 'Mrs. Sharma',
-      subject: 'English',
-      type: 'Suggestion',
-      remark: 'Good effort. Please encourage more reading at home to improve vocabulary.',
+      date: "2025-12-01",
+      teacher: "Mrs. Sharma",
+      subject: "English",
+      type: "Suggestion",
+      remark:
+        "Good effort. Please encourage more reading at home to improve vocabulary.",
       icon: MessageSquare,
-      color: 'bg-yellow-50 border-yellow-200'
-    }
+      color: "bg-yellow-50 border-yellow-200",
+    },
   ];
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'Resolved':
+      case "Resolved":
         return <CheckCircle className="w-5 h-5 text-green-600" />;
-      case 'In Progress':
+      case "In Progress":
         return <Clock className="w-5 h-5 text-yellow-600" />;
       default:
         return <AlertCircle className="w-5 h-5 text-red-600" />;
@@ -68,12 +79,12 @@ export function BehaviourComplaints() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'Resolved':
-        return 'bg-green-100 text-green-700';
-      case 'In Progress':
-        return 'bg-yellow-100 text-yellow-700';
+      case "Resolved":
+        return "bg-green-100 text-green-700";
+      case "In Progress":
+        return "bg-yellow-100 text-yellow-700";
       default:
-        return 'bg-red-100 text-red-700';
+        return "bg-red-100 text-red-700";
     }
   };
 
@@ -81,7 +92,9 @@ export function BehaviourComplaints() {
     <div className="space-y-6">
       <div>
         <h1 className="text-gray-900 mb-2">Behaviour & Complaints</h1>
-        <p className="text-gray-600">Monitor your child's behaviour feedback and complaint status</p>
+        <p className="text-gray-600">
+          Monitor your child's behaviour feedback and complaint status
+        </p>
       </div>
 
       {/* Summary Cards */}
@@ -121,7 +134,10 @@ export function BehaviourComplaints() {
           {behaviourRemarks.map((remark, index) => {
             const Icon = remark.icon;
             return (
-              <div key={index} className={`border rounded-lg p-6 ${remark.color}`}>
+              <div
+                key={index}
+                className={`border rounded-lg p-6 ${remark.color}`}
+              >
                 <div className="flex items-start gap-4">
                   <div className="flex-shrink-0">
                     <Icon className="w-6 h-6 text-gray-700" />
@@ -129,12 +145,16 @@ export function BehaviourComplaints() {
                   <div className="flex-1">
                     <div className="flex items-start justify-between mb-2">
                       <div>
-                        <h3 className="text-gray-900 mb-1">{remark.teacher} - {remark.subject}</h3>
+                        <h3 className="text-gray-900 mb-1">
+                          {remark.teacher} - {remark.subject}
+                        </h3>
                         <span className="inline-block px-3 py-1 bg-white rounded-full text-sm">
                           {remark.type}
                         </span>
                       </div>
-                      <span className="text-sm text-gray-600">{remark.date}</span>
+                      <span className="text-sm text-gray-600">
+                        {remark.date}
+                      </span>
                     </div>
                     <p className="text-gray-700 mt-3">{remark.remark}</p>
                   </div>
@@ -147,6 +167,72 @@ export function BehaviourComplaints() {
 
       {/* Complaints List */}
       <div className="bg-white rounded-xl shadow-sm p-6">
+        <h2 className="text-gray-900 mb-6 text-lg md:text-xl">
+          Child's Complaints Status
+        </h2>
+        <div className="space-y-4">
+          {complaints.map((complaint) => (
+            <div
+              key={complaint.id}
+              className="border border-gray-200 rounded-lg p-4 md:p-6 flex flex-col md:flex-col gap-4"
+            >
+              {/* Header: Issue + Status */}
+              <div className="flex flex-col md:flex-row md:items-start justify-between gap-3 md:gap-0">
+                <div className="flex-1">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
+                    <MessageSquare className="w-5 h-5 text-gray-600 flex-shrink-0" />
+                    <h3 className="text-gray-900 text-sm sm:text-base">
+                      {complaint.issue}
+                    </h3>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-sm text-gray-600">
+                    <span>ID: {complaint.id}</span>
+                    <span>•</span>
+                    <span>Submitted by: {complaint.submittedBy}</span>
+                    <span>•</span>
+                    <span>{complaint.category}</span>
+                    <span>•</span>
+                    <span>{complaint.date}</span>
+                  </div>
+                </div>
+
+                {/* Status badge */}
+                <div className="flex items-center gap-2 mt-2 md:mt-0">
+                  {getStatusIcon(complaint.status)}
+                  <span
+                    className={`px-3 py-1 rounded-full text-sm ${getStatusColor(
+                      complaint.status,
+                    )}`}
+                  >
+                    {complaint.status}
+                  </span>
+                </div>
+              </div>
+
+              {/* Responses */}
+              <div className="space-y-3">
+                <div className="p-4 bg-blue-50 rounded-lg">
+                  <p className="text-sm text-gray-700">
+                    <strong>Teacher Response:</strong>{" "}
+                    {complaint.teacherResponse}
+                  </p>
+                </div>
+
+                {complaint.resolution && (
+                  <div className="p-4 bg-green-50 rounded-lg">
+                    <p className="text-sm text-gray-700">
+                      <strong>Resolution:</strong> {complaint.resolution}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* <div className="bg-white rounded-xl shadow-sm p-6">
         <h2 className="text-gray-900 mb-6">Child's Complaints Status</h2>
         <div className="space-y-4">
           {complaints.map((complaint) => (
@@ -193,16 +279,27 @@ export function BehaviourComplaints() {
             </div>
           ))}
         </div>
-      </div>
+      </div> */}
 
       {/* Guidance Note */}
       <div className="bg-purple-50 border-l-4 border-purple-500 p-6 rounded-lg">
         <h3 className="text-gray-900 mb-3">Parent Guidance</h3>
         <div className="space-y-2 text-gray-700 text-sm">
-          <p>• All teacher remarks are meant to help your child improve and grow.</p>
-          <p>• Positive feedback should be encouraged at home to boost confidence.</p>
-          <p>• For suggestions, work together with teachers to implement improvements.</p>
-          <p>• Monitor complaint status regularly and discuss resolutions with your child.</p>
+          <p>
+            • All teacher remarks are meant to help your child improve and grow.
+          </p>
+          <p>
+            • Positive feedback should be encouraged at home to boost
+            confidence.
+          </p>
+          <p>
+            • For suggestions, work together with teachers to implement
+            improvements.
+          </p>
+          <p>
+            • Monitor complaint status regularly and discuss resolutions with
+            your child.
+          </p>
         </div>
       </div>
     </div>
