@@ -20,7 +20,7 @@ namespace SMS_Backend.Data
             {
                 Username = "admin1",
                 Email = "admin@gmail.com",
-                PasswordHash = "admin123",
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword("admin123"),
                 Role = UserRole.Admin,
                 IsActive = true,
                 CreatedAt = DateTime.Now
@@ -30,7 +30,7 @@ namespace SMS_Backend.Data
             {
                 Username = "teacher1",
                 Email = "teacher1@gmail.com",
-                PasswordHash = "teacher123",
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword("teacher123"),
                 Role = UserRole.Teacher,
                 IsActive = true,
                 CreatedAt = DateTime.Now
@@ -40,7 +40,7 @@ namespace SMS_Backend.Data
             {
                 Username = "teacher2",
                 Email = "teacher2@gmail.com",
-                PasswordHash = "teacher123",
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword("teacher123"),
                 Role = UserRole.Teacher,
                 IsActive = true,
                 CreatedAt = DateTime.Now
@@ -50,7 +50,7 @@ namespace SMS_Backend.Data
             {
                 Username = "student1",
                 Email = "student1@gmail.com",
-                PasswordHash = "student123",
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword("student123"),
                 Role = UserRole.Student,
                 IsActive = true,
                 CreatedAt = DateTime.Now
@@ -60,7 +60,7 @@ namespace SMS_Backend.Data
             {
                 Username = "student2",
                 Email = "student2@gmail.com",
-                PasswordHash = "student123",
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword("student123"),
                 Role = UserRole.Student,
                 IsActive = true,
                 CreatedAt = DateTime.Now
@@ -70,7 +70,7 @@ namespace SMS_Backend.Data
             {
                 Username = "parent1",
                 Email = "parent@gmail.com",
-                PasswordHash = "parent123",
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword("parent123"),
                 Role = UserRole.Parent,
                 IsActive = true,
                 CreatedAt = DateTime.Now
