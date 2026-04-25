@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using SMS_Backend.Data;
 using SMS_Backend.Models;
 using System.Security.Claims;
+using System.ComponentModel.DataAnnotations;
 
 namespace SMS_Backend.Controllers
 {
@@ -134,7 +135,17 @@ namespace SMS_Backend.Controllers
             if (!string.IsNullOrWhiteSpace(dto.LastName))   student.LastName   = dto.LastName;
             if (!string.IsNullOrWhiteSpace(dto.Class))      student.Class      = dto.Class;
             if (!string.IsNullOrWhiteSpace(dto.Section))    student.Section    = dto.Section;
-            if (!string.IsNullOrWhiteSpace(dto.RollNumber)) student.RollNumber = dto.RollNumber;
+            //if (!string.IsNullOrWhiteSpace(dto.RollNumber)) student.RollNumber = dto.RollNumber;
+            if (!string.IsNullOrWhiteSpace(dto.RollNumber))
+            {
+                var duplicate = await _context.Students
+                    .AnyAsync(s => s.RollNumber == dto.RollNumber && s.StudentId != id);
+
+                if (duplicate)
+                    return Conflict(new { message = "Roll number already exists." });
+
+                student.RollNumber = dto.RollNumber;
+            }
 
             await _context.SaveChangesAsync();
             return Ok(new { message = "Student updated successfully." });
@@ -170,14 +181,24 @@ namespace SMS_Backend.Controllers
 
     public class CreateStudentDto
     {
+        [Required]
         public int UserId { get; set; }
+
+        [Required]
         public string FirstName { get; set; } = string.Empty;
+
+        [Required]
         public string LastName { get; set; } = string.Empty;
+
+        [Required]
         public string Class { get; set; } = string.Empty;
+
+        [Required]
         public string Section { get; set; } = string.Empty;
+
+        [Required]
         public string RollNumber { get; set; } = string.Empty;
     }
-
     public class UpdateStudentDto
     {
         public string? FirstName { get; set; }

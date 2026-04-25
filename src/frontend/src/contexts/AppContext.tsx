@@ -1,13 +1,22 @@
 // Global Application Context with Role-Based Access Control
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { User, dataService } from '../services/dataService';
-import { sessionService } from '../services/sessionService';
-import { UserRole } from '../App';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
+import { User, dataService } from "../services/dataService";
+import { sessionService } from "../services/sessionService";
+import { UserRole } from "../App";
 
 interface AppContextType {
   currentUser: User | null;
   isAuthenticated: boolean;
-  login: (email: string, password: string) => Promise<{ success: boolean; message?: string }>;
+  login: (
+    email: string,
+    password: string,
+  ) => Promise<{ success: boolean; message?: string }>;
   logout: () => void;
   hasPermission: (requiredRole: UserRole | UserRole[]) => boolean;
   canAccessEntity: (entityType: string, entityId: string) => boolean;
@@ -31,27 +40,53 @@ export function AppProvider({ children }: { children: ReactNode }) {
     // Listen for session timeout
     const handleSessionTimeout = () => {
       handleLogout();
-      alert('Your session has expired due to inactivity. Please login again.');
+      alert("Your session has expired due to inactivity. Please login again.");
     };
 
-    window.addEventListener('sessionTimeout', handleSessionTimeout);
+    window.addEventListener("sessionTimeout", handleSessionTimeout);
 
     return () => {
-      window.removeEventListener('sessionTimeout', handleSessionTimeout);
+      window.removeEventListener("sessionTimeout", handleSessionTimeout);
     };
   }, []);
 
-  const handleLogin = async (email: string, password: string): Promise<{ success: boolean; message?: string }> => {
-    const result = dataService.authenticate(email, password);
-    
-    if (result.success && result.user) {
-      sessionService.startSession(result.user);
-      setCurrentUser(result.user);
-      setIsAuthenticated(true);
-      return { success: true };
-    }
+  //========PREVIOUS IMPLEMENTATION===
+  // const handleLogin = async (email: string, password: string): Promise<{ success: boolean; message?: string }> => {
+  //   const result = dataService.authenticate(email, password);
 
-    return { success: false, message: result.message };
+  //   if (result.success && result.user) {
+  //     sessionService.startSession(result.user);
+  //     setCurrentUser(result.user);
+  //     setIsAuthenticated(true);
+  //     return { success: true };
+  //   }
+
+  //   return { success: false, message: result.message };
+  // };
+  const handleLogin = async (
+    email: string,
+    password: string,
+  ): Promise<{ success: boolean; message?: string }> => {
+    try {
+      const result = await dataService.authenticate(email, password);
+
+      if (result.success && result.user) {
+        sessionService.startSession(result.user);
+        setCurrentUser(result.user);
+        setIsAuthenticated(true);
+        return { success: true };
+      }
+
+      return {
+        success: false,
+        message: result.message || "Invalid credentials",
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: "Login failed. Please try again.",
+      };
+    }
   };
 
   const handleLogout = () => {
@@ -71,20 +106,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (!currentUser) return false;
 
     // Admin can access everything
-    if (currentUser.role === 'admin') return true;
+    if (currentUser.role === "admin") return true;
 
     // Role-based entity access control
     switch (entityType) {
-      case 'student':
-        if (currentUser.role === 'student') {
+      case "student":
+        if (currentUser.role === "student") {
           const student = dataService.getStudentByUserId(currentUser.id);
           return student?.id === entityId;
         }
-        if (currentUser.role === 'parent') {
+        if (currentUser.role === "parent") {
           const parent = dataService.getParentByUserId(currentUser.id);
           return parent?.childrenIds.includes(entityId) || false;
         }
-        if (currentUser.role === 'teacher') {
+        if (currentUser.role === "teacher") {
           // Teachers can access students in their assigned classes
           const teacher = dataService.getTeacherByUserId(currentUser.id);
           const student = dataService.getStudentById(entityId);
@@ -95,21 +130,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
         }
         return false;
 
-      case 'parent':
-        if (currentUser.role === 'parent') {
+      case "parent":
+        if (currentUser.role === "parent") {
           const parent = dataService.getParentByUserId(currentUser.id);
           return parent?.id === entityId;
         }
         return false;
 
-      case 'teacher':
-        if (currentUser.role === 'teacher') {
+      case "teacher":
+        if (currentUser.role === "teacher") {
           const teacher = dataService.getTeacherByUserId(currentUser.id);
           return teacher?.id === entityId;
         }
         return false;
 
-      case 'message':
+      case "message":
         // Can access messages sent to or from the current user
         const data = dataService;
         // This would need the actual message ID lookup
@@ -138,7 +173,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         logout: handleLogout,
         hasPermission,
         canAccessEntity,
-        refreshUser
+        refreshUser,
       }}
     >
       {children}
@@ -149,7 +184,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 export function useApp() {
   const context = useContext(AppContext);
   if (context === undefined) {
-    throw new Error('useApp must be used within an AppProvider');
+    throw new Error("useApp must be used within an AppProvider");
   }
   return context;
 }

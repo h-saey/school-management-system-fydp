@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SMS_Backend.Data;
 using SMS_Backend.Models;
+using System.ComponentModel.DataAnnotations;
 
 namespace SMS_Backend.Controllers
 {

@@ -4,6 +4,8 @@ using SMS_Backend.Models;
 using SMS_Backend.Services;
 using BCrypt.Net;
 using Microsoft.EntityFrameworkCore;
+using SMS_Backend.DTOs;
+
 
 namespace SMS_Backend.Controllers
 {
@@ -22,7 +24,8 @@ namespace SMS_Backend.Controllers
 
         // REGISTER (optional for now)
         [HttpPost("register")]
-        public async Task<IActionResult> Register(User user)
+        public async Task<IActionResult> Register([FromBody] User user)
+
         {
             user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(user.PasswordHash);
 
@@ -34,14 +37,14 @@ namespace SMS_Backend.Controllers
 
         // LOGIN
         [HttpPost("login")]
-        public async Task<IActionResult> Login(string email, string password)
+        public async Task<IActionResult> Login([FromBody] LoginDto request)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(x => x.Email == email);
+            var user = await _context.Users.FirstOrDefaultAsync(x => x.Email == request.Email);
 
             if (user == null)
                 return BadRequest("User not found");
 
-            if (!BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
+            if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
                 return BadRequest("Invalid password");
 
             var token = _jwtService.GenerateToken(user);
@@ -50,7 +53,13 @@ namespace SMS_Backend.Controllers
             {
                 message = "Login successful",
                 token,
-                role = user.Role
+                user = new
+                {
+                    id = user.UserId,
+                    name = user.Username,
+                    email = user.Email,
+                    role = user.Role.ToString().ToLower()
+                }
             });
         }
     }

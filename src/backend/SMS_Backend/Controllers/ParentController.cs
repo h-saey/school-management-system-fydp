@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using SMS_Backend.Data;
 using SMS_Backend.Models;
 using System.Security.Claims;
+using System.ComponentModel.DataAnnotations;
 
 namespace SMS_Backend.Controllers
 {
@@ -93,6 +94,11 @@ namespace SMS_Backend.Controllers
             if (!studentExists)
                 return BadRequest(new { message = "Linked student not found." });
 
+            var exists = await _context.Parents.AnyAsync(p => p.UserId == dto.UserId);
+
+            if (exists)
+                return Conflict(new { message = "Parent already linked." });
+
             var parent = new Parent
             {
                 UserId    = dto.UserId,
@@ -117,7 +123,17 @@ namespace SMS_Backend.Controllers
                 return NotFound(new { message = "Parent not found." });
 
             if (!string.IsNullOrWhiteSpace(dto.Relation)) parent.Relation = dto.Relation;
-            if (dto.StudentId.HasValue)                   parent.StudentId = dto.StudentId.Value;
+            // if (dto.StudentId.HasValue)                   parent.StudentId = dto.StudentId.Value;
+            if (dto.StudentId.HasValue)
+            {
+                var studentExists = await _context.Students
+                    .AnyAsync(s => s.StudentId == dto.StudentId.Value);
+
+                if (!studentExists)
+                    return BadRequest(new { message = "Student not found." });
+
+                parent.StudentId = dto.StudentId.Value;
+            }
 
             await _context.SaveChangesAsync();
             return Ok(new { message = "Parent updated successfully." });
@@ -164,8 +180,13 @@ namespace SMS_Backend.Controllers
 
     public class CreateParentDto
     {
+        [Required]
         public int UserId { get; set; }
+
+        [Required]
         public int StudentId { get; set; }
+
+        [Required]
         public string Relation { get; set; } = string.Empty;
     }
 

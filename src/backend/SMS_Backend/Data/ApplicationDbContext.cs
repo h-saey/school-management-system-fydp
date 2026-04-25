@@ -27,6 +27,8 @@ namespace SMS_Backend.Data
         // COMMUNICATION
         public DbSet<Message> Messages { get; set; }
         public DbSet<Notification> Notifications { get; set; }
+        public DbSet<Notice> Notices { get; set; }
+
 
         // SYSTEM
         public DbSet<Complaint> Complaints { get; set; }

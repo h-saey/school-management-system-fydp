@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SMS_Backend.Data;
 using SMS_Backend.Models;
+using System.ComponentModel.DataAnnotations;
 
 namespace SMS_Backend.Controllers
 {
@@ -60,6 +61,7 @@ namespace SMS_Backend.Controllers
 
         // POST: api/admin
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateAdmin([FromBody] CreateAdminDto dto)
         {
             if (!ModelState.IsValid)
@@ -90,6 +92,7 @@ namespace SMS_Backend.Controllers
 
         // PUT: api/admin/{id}
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateAdmin(int id, [FromBody] UpdateAdminDto dto)
         {
             var admin = await _context.Admins.FindAsync(id);
@@ -105,6 +108,7 @@ namespace SMS_Backend.Controllers
 
         // DELETE: api/admin/{id}
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteAdmin(int id)
         {
             var admin = await _context.Admins.FindAsync(id);
@@ -137,8 +141,11 @@ namespace SMS_Backend.Controllers
 
     public class CreateAdminDto
     {
+        [Required]
         public int UserId { get; set; }
+        [Required]
         public string FirstName { get; set; } = string.Empty;
+        [Required]
         public string LastName { get; set; } = string.Empty;
     }
 

@@ -7,7 +7,11 @@ using SMS_Backend.Services;
 
 
 var builder = WebApplication.CreateBuilder(args);
-var key = Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]);
+var jwtKey = builder.Configuration["Jwt:Key"]
+    ?? throw new Exception("JWT Key missing in appsettings");
+
+var key = Encoding.UTF8.GetBytes(jwtKey);
+
 // Add services to the container.
 
 builder.Services.AddControllers();
@@ -47,6 +51,17 @@ builder.Services.AddSwaggerGen(options =>
         }
     });
 });
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll",
+        policy => policy.AllowAnyOrigin()
+                        .AllowAnyHeader()
+                        .AllowAnyMethod());
+});
+
+
+
 
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -95,12 +110,18 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
+app.UseRouting();
+app.UseCors("AllowAll");
+
 
 app.UseAuthentication();
 
 app.UseAuthorization();
 
 app.MapControllers();
+
+
+
 
 app.Run();
