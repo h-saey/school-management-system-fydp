@@ -1,62 +1,134 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Users, Plus, Edit, Trash2, Search } from "lucide-react";
 
 export function ManageStudents() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const students = [
-    {
-      id: 1,
-      rollNo: "001",
-      name: "Aarav Patel",
-      class: "Class 10-A",
-      section: "A",
-      dob: "2010-05-15",
-      parent: "Mr. Patel",
-      phone: "9876543210",
-    },
-    {
-      id: 2,
-      rollNo: "002",
-      name: "Aadhya Sharma",
-      class: "Class 10-A",
-      section: "A",
-      dob: "2010-06-20",
-      parent: "Mrs. Sharma",
-      phone: "9876543211",
-    },
-    {
-      id: 3,
-      rollNo: "003",
-      name: "Advait Kumar",
-      class: "Class 10-A",
-      section: "A",
-      dob: "2010-04-10",
-      parent: "Mr. Kumar",
-      phone: "9876543212",
-    },
-    {
-      id: 4,
-      rollNo: "004",
-      name: "Ananya Singh",
-      class: "Class 9-B",
-      section: "B",
-      dob: "2011-07-25",
-      parent: "Mrs. Singh",
-      phone: "9876543213",
-    },
-    {
-      id: 5,
-      rollNo: "005",
-      name: "Arjun Reddy",
-      class: "Class 9-B",
-      section: "B",
-      dob: "2011-03-12",
-      parent: "Mr. Reddy",
-      phone: "9876543214",
-    },
-  ];
+  // const students = [
+  //   {
+  //     id: 1,
+  //     rollNo: "001",
+  //     name: "Aarav Patel",
+  //     class: "Class 10-A",
+  //     section: "A",
+  //     dob: "2010-05-15",
+  //     parent: "Mr. Patel",
+  //     phone: "9876543210",
+  //   },
+  //   {
+  //     id: 2,
+  //     rollNo: "002",
+  //     name: "Aadhya Sharma",
+  //     class: "Class 10-A",
+  //     section: "A",
+  //     dob: "2010-06-20",
+  //     parent: "Mrs. Sharma",
+  //     phone: "9876543211",
+  //   },
+  //   {
+  //     id: 3,
+  //     rollNo: "003",
+  //     name: "Advait Kumar",
+  //     class: "Class 10-A",
+  //     section: "A",
+  //     dob: "2010-04-10",
+  //     parent: "Mr. Kumar",
+  //     phone: "9876543212",
+  //   },
+  //   {
+  //     id: 4,
+  //     rollNo: "004",
+  //     name: "Ananya Singh",
+  //     class: "Class 9-B",
+  //     section: "B",
+  //     dob: "2011-07-25",
+  //     parent: "Mrs. Singh",
+  //     phone: "9876543213",
+  //   },
+  //   {
+  //     id: 5,
+  //     rollNo: "005",
+  //     name: "Arjun Reddy",
+  //     class: "Class 9-B",
+  //     section: "B",
+  //     dob: "2011-03-12",
+  //     parent: "Mr. Reddy",
+  //     phone: "9876543214",
+  //   },
+  // ];
+
+  const [students, setStudents] = useState([]);
+  const [newStudent, setNewStudent] = useState({
+    userId: "",
+    firstName: "",
+    lastName: "",
+    class: "",
+    section: "",
+    rollNumber: "",
+  });
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    fetch("http://localhost:5036/api/Student", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("Students:", data);
+        setStudents(data);
+      })
+      .catch((err) => {
+        console.error("Error fetching students:", err);
+      });
+  }, []);
+
+  const handleAddStudent = async (e) => {
+    e.preventDefault();
+
+    const token = localStorage.getItem("token");
+
+    try {
+      const response = await fetch("http://localhost:5036/api/Student", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(newStudent),
+      });
+
+      if (response.ok) {
+        const addedStudent = await response.json();
+
+        // add new student to list
+        setStudents([...students, addedStudent]);
+
+        // clear form
+        setNewStudent({
+          name: "",
+          dob: "",
+          class: "",
+          section: "",
+          rollNo: "",
+          parent: "",
+          phone: "",
+          email: "",
+        });
+
+        setShowAddForm(false);
+
+        alert("Student added successfully ✅");
+      } else {
+        alert("Failed to add student ❌");
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   const filteredStudents = students.filter(
     (student) =>
@@ -87,11 +159,21 @@ export function ManageStudents() {
       {showAddForm && (
         <div className="bg-white rounded-xl shadow-sm p-6">
           <h2 className="text-gray-900 mb-6">Add New Student</h2>
-          <form className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <form
+            onSubmit={handleAddStudent}
+            className="grid grid-cols-1 md:grid-cols-2 gap-4"
+          >
             <div>
               <label className="block text-gray-700 mb-2">Student Name</label>
               <input
                 type="text"
+                value={newStudent.name}
+                onChange={(e) =>
+                  setNewStudent({
+                    ...newStudent,
+                    name: e.target.value,
+                  })
+                }
                 placeholder="Enter full name"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
               />
@@ -100,12 +182,28 @@ export function ManageStudents() {
               <label className="block text-gray-700 mb-2">Date of Birth</label>
               <input
                 type="date"
+                value={newStudent.dob}
+                onChange={(e) =>
+                  setNewStudent({
+                    ...newStudent,
+                    dob: e.target.value,
+                  })
+                }
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
               />
             </div>
             <div>
               <label className="block text-gray-700 mb-2">Class</label>
-              <select className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+              <select
+                value={newStudent.class}
+                onChange={(e) =>
+                  setNewStudent({
+                    ...newStudent,
+                    class: e.target.value,
+                  })
+                }
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+              >
                 <option>Class 6</option>
                 <option>Class 7</option>
                 <option>Class 8</option>
@@ -115,7 +213,16 @@ export function ManageStudents() {
             </div>
             <div>
               <label className="block text-gray-700 mb-2">Section</label>
-              <select className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+              <select
+                value={newStudent.section}
+                onChange={(e) =>
+                  setNewStudent({
+                    ...newStudent,
+                    section: e.target.value,
+                  })
+                }
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+              >
                 <option>A</option>
                 <option>B</option>
                 <option>C</option>
@@ -125,6 +232,13 @@ export function ManageStudents() {
               <label className="block text-gray-700 mb-2">Roll Number</label>
               <input
                 type="text"
+                value={newStudent.rollNo}
+                onChange={(e) =>
+                  setNewStudent({
+                    ...newStudent,
+                    rollNo: e.target.value,
+                  })
+                }
                 placeholder="Auto-generated"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
               />
@@ -135,6 +249,13 @@ export function ManageStudents() {
               </label>
               <input
                 type="text"
+                value={newStudent.parent}
+                onChange={(e) =>
+                  setNewStudent({
+                    ...newStudent,
+                    parent: e.target.value,
+                  })
+                }
                 placeholder="Enter parent name"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
               />
@@ -143,6 +264,13 @@ export function ManageStudents() {
               <label className="block text-gray-700 mb-2">Contact Number</label>
               <input
                 type="tel"
+                value={newStudent.phone}
+                onChange={(e) =>
+                  setNewStudent({
+                    ...newStudent,
+                    phone: e.target.value,
+                  })
+                }
                 placeholder="Enter phone number"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
               />
@@ -151,6 +279,13 @@ export function ManageStudents() {
               <label className="block text-gray-700 mb-2">Email</label>
               <input
                 type="email"
+                value={newStudent.email}
+                onChange={(e) =>
+                  setNewStudent({
+                    ...newStudent,
+                    email: e.target.value,
+                  })
+                }
                 placeholder="Enter email address"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
               />
@@ -234,10 +369,10 @@ export function ManageStudents() {
               {filteredStudents.map((student) => (
                 <tr key={student.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 text-gray-700 whitespace-nowrap">
-                    {student.rollNo}
+                    {student.rollNumber}
                   </td>
                   <td className="px-6 py-4 text-gray-900 whitespace-nowrap">
-                    {student.name}
+                    {student.firstName} {student.lastName}
                   </td>
                   <td className="px-6 py-4 text-gray-700 whitespace-nowrap">
                     {student.class}

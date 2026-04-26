@@ -126,6 +126,41 @@ namespace SMS_Backend.Controllers
 
             return Ok(users);
         }
+
+        // POST: api/user
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> CreateUser([FromBody] CreateUserDto dto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var emailExists = await _context.Users
+                .AnyAsync(u => u.Email == dto.Email);
+
+            if (emailExists)
+                return Conflict(new { message = "Email already exists." });
+
+            var user = new User
+            {
+                Username = dto.Username,
+                Email = dto.Email,
+                PasswordHash = dto.Password, // assuming plain text for now
+                Role = dto.Role,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                message = "User created successfully",
+                userId = user.UserId
+            });
+        }
+
     }
 
     public class UpdateUserDto
@@ -133,4 +168,20 @@ namespace SMS_Backend.Controllers
         public string? Username { get; set; }
         public string? Email { get; set; }
     }
+
+    public class CreateUserDto
+    {
+        [Required]
+        public string Username { get; set; }
+
+        [Required]
+        public string Email { get; set; }
+
+        [Required]
+        public string Password { get; set; }
+
+        [Required]
+        public UserRole Role { get; set; }
+    }
+
 }
