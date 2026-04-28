@@ -120,23 +120,86 @@ namespace SMS_Backend.Controllers
             return Ok(new { message = "Admin deleted successfully." });
         }
 
-        // GET: api/admin/dashboard-stats — quick summary for admin dashboard
+        //// GET: api/admin/dashboard-stats — quick summary for admin dashboard
+        //[HttpGet("dashboard-stats")]
+        //public async Task<IActionResult> GetDashboardStats()
+        //{
+        //    var stats = new
+        //    {
+        //        TotalStudents  = await _context.Students.CountAsync(),
+        //        TotalTeachers  = await _context.Teachers.CountAsync(),
+        //        TotalParents   = await _context.Parents.CountAsync(),
+        //        ActiveUsers    = await _context.Users.CountAsync(u => u.IsActive),
+        //        OpenComplaints = await _context.Complaints
+        //            .CountAsync(c => c.Status == ComplaintStatus.Submitted || c.Status == ComplaintStatus.UnderReview),
+        //        OverdueFees    = await _context.Fees.CountAsync(f => f.Status == FeeStatus.Overdue)
+        //    };
+
+        //    return Ok(stats);
+        //}
         [HttpGet("dashboard-stats")]
         public async Task<IActionResult> GetDashboardStats()
         {
-            var stats = new
+            var baseStats = new
             {
-                TotalStudents  = await _context.Students.CountAsync(),
-                TotalTeachers  = await _context.Teachers.CountAsync(),
-                TotalParents   = await _context.Parents.CountAsync(),
-                ActiveUsers    = await _context.Users.CountAsync(u => u.IsActive),
-                OpenComplaints = await _context.Complaints
-                    .CountAsync(c => c.Status == ComplaintStatus.Submitted || c.Status == ComplaintStatus.UnderReview),
-                OverdueFees    = await _context.Fees.CountAsync(f => f.Status == FeeStatus.Overdue)
+                TotalStudents = await _context.Students.CountAsync(),
+                TotalTeachers = await _context.Teachers.CountAsync(),
+                TotalParents = await _context.Parents.CountAsync(),
+                ActiveUsers = await _context.Users.CountAsync(u => u.IsActive),
+                OpenComplaints = await _context.Complaints.CountAsync(c =>
+                    c.Status == ComplaintStatus.Submitted ||
+                    c.Status == ComplaintStatus.UnderReview),
+                OverdueFees = await _context.Fees.CountAsync(f => f.Status == FeeStatus.Overdue)
             };
 
-            return Ok(stats);
+            // REAL attendance (example: grouped by month)
+            var attendance = await _context.Attendances
+                .GroupBy(a => new { a.Date.Year, a.Date.Month })
+                .Select(g => new MonthlyAttendanceDto
+                {
+                    Month = g.Key.Month.ToString(),
+                    Attendance = g.Count()
+                })
+                .ToListAsync();
+
+            // REAL class performance
+            var classPerf = await _context.Marks
+                .Include(m => m.Student)
+                .GroupBy(m => m.Student.Class)
+                .Select(g => new ClassPerformanceDto
+                {
+                    Class = g.Key,
+                    Average = Convert.ToDouble(g.Average(x => x.Percentage))
+
+                })
+                .ToListAsync();
+
+            // REAL fee breakdown
+            var fees = await _context.Fees.ToListAsync();
+
+            var feeBreakdown = new FeeBreakdownDto
+            {
+                Paid = fees.Count(f => f.Status == FeeStatus.Paid),
+                Unpaid = fees.Count(f => f.Status == FeeStatus.Unpaid),
+                Overdue = fees.Count(f => f.Status == FeeStatus.Overdue)
+            };
+
+            return Ok(new AdminDashboardDto
+            {
+                TotalStudents = baseStats.TotalStudents,
+                TotalTeachers = baseStats.TotalTeachers,
+                TotalParents = baseStats.TotalParents,
+                ActiveUsers = baseStats.ActiveUsers,
+                OpenComplaints = baseStats.OpenComplaints,
+                OverdueFees = baseStats.OverdueFees,
+
+                AttendanceTrend = attendance,
+                ClassPerformance = classPerf,
+                FeeBreakdown = feeBreakdown
+            });
         }
+
+
     }
 
     public class CreateAdminDto
@@ -154,4 +217,38 @@ namespace SMS_Backend.Controllers
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
     }
+    public class AdminDashboardDto
+    {
+        public int TotalStudents { get; set; }
+        public int TotalTeachers { get; set; }
+        public int TotalParents { get; set; }
+        public int ActiveUsers { get; set; }
+        public int OpenComplaints { get; set; }
+        public int OverdueFees { get; set; }
+
+        // REAL ANALYTICS
+        public List<MonthlyAttendanceDto> AttendanceTrend { get; set; } = new();
+        public List<ClassPerformanceDto> ClassPerformance { get; set; } = new();
+        public FeeBreakdownDto FeeBreakdown { get; set; } = new();
+    }
+
+    public class MonthlyAttendanceDto
+    {
+        public string Month { get; set; } = "";
+        public double Attendance { get; set; }
+    }
+
+    public class ClassPerformanceDto
+    {
+        public string Class { get; set; } = "";
+        public double Average { get; set; }
+    }
+
+    public class FeeBreakdownDto
+    {
+        public double Paid { get; set; }
+        public double Unpaid { get; set; }
+        public double Overdue { get; set; }
+    }
+
 }

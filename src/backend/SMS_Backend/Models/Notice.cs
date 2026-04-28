@@ -12,6 +12,24 @@ namespace SMS_Backend.Models
         ClassSpecific
     }
 
+    // NEW
+    public enum NoticeType
+    {
+        Exam,
+        Holiday,
+        Event,
+        Fee,
+        Academic
+    }
+
+    // NEW
+    public enum NoticePriority
+    {
+        High,
+        Medium,
+        Low
+    }
+
     public class Notice
     {
         [Key]
@@ -29,17 +47,26 @@ namespace SMS_Backend.Models
         public string Content { get; set; } = string.Empty;
 
         [Required]
-        public NoticeAudience Audience { get; set; } = NoticeAudience.SchoolWide;
+        public NoticeAudience Audience { get; set; } =
+            NoticeAudience.SchoolWide;
 
-        // Optional: if Audience = ClassSpecific
+        // NEW
+        [Required]
+        public NoticeType Type { get; set; }
+
+        // NEW
+        [Required]
+        public NoticePriority Priority { get; set; }
+
+        // Optional
         [MaxLength(50)]
         public string? TargetClass { get; set; }
 
-        public DateTime PostedAt { get; set; } = DateTime.UtcNow;
+        public DateTime PostedAt { get; set; } =
+            DateTime.UtcNow;
 
         public bool IsActive { get; set; } = true;
 
-        // Navigation
         [ForeignKey("PostedByUserId")]
         public User PostedBy { get; set; } = null!;
     }

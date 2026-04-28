@@ -5,6 +5,9 @@ using SMS_Backend.Data;
 using SMS_Backend.Models;
 using System.Security.Claims;
 using System.Text;
+using iText.Kernel.Pdf;
+using iText.Layout;
+using iText.Layout.Element;
 
 namespace SMS_Backend.Controllers
 {
@@ -20,10 +23,10 @@ namespace SMS_Backend.Controllers
             _context = context;
         }
 
-        private int GetCurrentUserId() =>
-            int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        private int GetCurrentUserId()
+            => int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
-        // GET: api/report
+        // ---------------- GET ALL REPORTS ----------------
         [HttpGet]
         public async Task<IActionResult> GetAllReports()
         {
@@ -35,7 +38,9 @@ namespace SMS_Backend.Controllers
                     r.Type,
                     r.GeneratedOn,
                     r.FilePath,
-                    GeneratedBy = new { r.Admin.FirstName, r.Admin.LastName }
+                    GeneratedBy = r.Admin != null
+                        ? new { r.Admin.FirstName, r.Admin.LastName }
+                        : null
                 })
                 .OrderByDescending(r => r.GeneratedOn)
                 .ToListAsync();
@@ -43,7 +48,7 @@ namespace SMS_Backend.Controllers
             return Ok(reports);
         }
 
-        // GET: api/report/{id}
+        // ---------------- GET SINGLE REPORT ----------------
         [HttpGet("{id}")]
         public async Task<IActionResult> GetReport(int id)
         {
@@ -57,7 +62,7 @@ namespace SMS_Backend.Controllers
             return Ok(report);
         }
 
-        // POST: api/report/attendance — Generate attendance report
+        // ---------------- ATTENDANCE REPORT ----------------
         [HttpPost("attendance")]
         public async Task<IActionResult> GenerateAttendanceReport(
             [FromQuery] string? className,
@@ -70,38 +75,37 @@ namespace SMS_Backend.Controllers
 
             if (!string.IsNullOrEmpty(className))
                 query = query.Where(a => a.Student.Class == className);
-            if (from.HasValue) query = query.Where(a => a.Date >= from.Value);
-            if (to.HasValue)   query = query.Where(a => a.Date <= to.Value);
+
+            if (from.HasValue)
+                query = query.Where(a => a.Date >= from.Value);
+
+            if (to.HasValue)
+                query = query.Where(a => a.Date <= to.Value);
 
             var records = await query
                 .OrderBy(a => a.Student.RollNumber)
-                .ThenBy(a => a.Date)
                 .ToListAsync();
 
             var sb = new StringBuilder();
             sb.AppendLine("ATTENDANCE REPORT");
             sb.AppendLine($"Generated: {DateTime.UtcNow:yyyy-MM-dd HH:mm} UTC");
-            if (!string.IsNullOrEmpty(className)) sb.AppendLine($"Class: {className}");
-            if (from.HasValue) sb.AppendLine($"From: {from.Value:yyyy-MM-dd}");
-            if (to.HasValue)   sb.AppendLine($"To:   {to.Value:yyyy-MM-dd}");
-            sb.AppendLine(new string('-', 60));
-            sb.AppendLine($"{"Roll No",-12} {"Name",-25} {"Date",-12} {"Status"}");
             sb.AppendLine(new string('-', 60));
 
             foreach (var a in records)
             {
-                sb.AppendLine($"{a.Student.RollNumber,-12} " +
-                              $"{a.Student.FirstName + " " + a.Student.LastName,-25} " +
-                              $"{a.Date:yyyy-MM-dd,-12} {a.Status}");
+                if (a.Student == null) continue;
+
+                sb.AppendLine($"{a.Student.RollNumber} | " +
+                              $"{a.Student.FirstName} {a.Student.LastName} | " +
+                              $"{a.Date:yyyy-MM-dd} | {a.Status}");
             }
 
-            sb.AppendLine(new string('-', 60));
             sb.AppendLine($"Total Records: {records.Count}");
 
             return await SaveAndReturnReport("Attendance", sb.ToString());
         }
 
-        // POST: api/report/marks — Generate marks report
+        // ---------------- MARKS REPORT ----------------
         [HttpPost("marks")]
         public async Task<IActionResult> GenerateMarksReport(
             [FromQuery] string? className,
@@ -114,8 +118,10 @@ namespace SMS_Backend.Controllers
 
             if (!string.IsNullOrEmpty(className))
                 query = query.Where(m => m.Student.Class == className);
+
             if (!string.IsNullOrEmpty(subject))
                 query = query.Where(m => m.Subject == subject);
+
             if (!string.IsNullOrEmpty(exam))
                 query = query.Where(m => m.Exam == exam);
 
@@ -126,33 +132,32 @@ namespace SMS_Backend.Controllers
             var sb = new StringBuilder();
             sb.AppendLine("MARKS REPORT");
             sb.AppendLine($"Generated: {DateTime.UtcNow:yyyy-MM-dd HH:mm} UTC");
-            if (!string.IsNullOrEmpty(className)) sb.AppendLine($"Class: {className}");
-            if (!string.IsNullOrEmpty(subject))   sb.AppendLine($"Subject: {subject}");
-            if (!string.IsNullOrEmpty(exam))      sb.AppendLine($"Exam: {exam}");
-            sb.AppendLine(new string('-', 70));
-            sb.AppendLine($"{"Roll No",-12} {"Name",-25} {"Subject",-15} {"Exam",-12} {"Marks",-10} {"Pct"}");
             sb.AppendLine(new string('-', 70));
 
             foreach (var m in records)
             {
-                sb.AppendLine($"{m.Student.RollNumber,-12} " +
-                              $"{m.Student.FirstName + " " + m.Student.LastName,-25} " +
-                              $"{m.Subject,-15} {m.Exam,-12} " +
-                              $"{m.MarksObtained}/{m.TotalMarks,-6} {m.Percentage:F1}%");
+                if (m.Student == null) continue;
+
+                sb.AppendLine($"{m.Student.RollNumber} | " +
+                              $"{m.Student.FirstName} {m.Student.LastName} | " +
+                              $"{m.Subject} | {m.Exam} | " +
+                              $"{m.MarksObtained}/{m.TotalMarks} | {m.Percentage}%");
             }
 
-            sb.AppendLine(new string('-', 70));
             if (records.Any())
             {
-                double overallAvg = records.Average(m => (double)m.Percentage);
-                sb.AppendLine($"Class Average: {overallAvg:F1}%");
+                var avg = records.Average(x => (double)x.Percentage);
+                sb.AppendLine($"Class Average: {avg:F1}%");
             }
-            sb.AppendLine($"Total Records: {records.Count}");
+            else
+            {
+                sb.AppendLine("Class Average: N/A");
+            }
 
             return await SaveAndReturnReport("Marks", sb.ToString());
         }
 
-        // POST: api/report/risk — Generate student risk report
+        // ---------------- RISK REPORT ----------------
         [HttpPost("risk")]
         public async Task<IActionResult> GenerateRiskReport([FromQuery] RiskLevel? level)
         {
@@ -160,39 +165,37 @@ namespace SMS_Backend.Controllers
                 .Include(r => r.Student)
                 .AsQueryable();
 
-            if (level.HasValue) query = query.Where(r => r.RiskLevel == level.Value);
+            if (level.HasValue)
+                query = query.Where(r => r.RiskLevel == level.Value);
 
-            // Get the latest risk record per student
             var latest = await query
                 .GroupBy(r => r.StudentId)
                 .Select(g => g.OrderByDescending(r => r.MonitoredOn).First())
                 .ToListAsync();
 
             var sb = new StringBuilder();
-            sb.AppendLine("STUDENT RISK MONITORING REPORT");
+            sb.AppendLine("RISK REPORT");
             sb.AppendLine($"Generated: {DateTime.UtcNow:yyyy-MM-dd HH:mm} UTC");
-            if (level.HasValue) sb.AppendLine($"Filter: {level.Value} risk only");
-            sb.AppendLine(new string('-', 70));
-            sb.AppendLine($"{"Roll No",-12} {"Name",-25} {"Class",-10} {"Risk Level",-12} {"Assessed On"}");
             sb.AppendLine(new string('-', 70));
 
-            foreach (var r in latest.OrderByDescending(r => r.RiskLevel))
+            foreach (var r in latest)
             {
-                sb.AppendLine($"{r.Student.RollNumber,-12} " +
-                              $"{r.Student.FirstName + " " + r.Student.LastName,-25} " +
-                              $"{r.Student.Class,-10} {r.RiskLevel,-12} {r.MonitoredOn:yyyy-MM-dd}");
+                if (r.Student == null) continue;
+
+                sb.AppendLine($"{r.Student.RollNumber} | " +
+                              $"{r.Student.FirstName} {r.Student.LastName} | " +
+                              $"{r.Student.Class} | {r.RiskLevel} | " +
+                              $"{r.MonitoredOn:yyyy-MM-dd}");
             }
 
-            sb.AppendLine(new string('-', 70));
-            sb.AppendLine($"High Risk:   {latest.Count(r => r.RiskLevel == RiskLevel.High)}");
-            sb.AppendLine($"Medium Risk: {latest.Count(r => r.RiskLevel == RiskLevel.Medium)}");
-            sb.AppendLine($"Low Risk:    {latest.Count(r => r.RiskLevel == RiskLevel.Low)}");
-            sb.AppendLine($"Total: {latest.Count}");
+            sb.AppendLine($"High: {latest.Count(x => x.RiskLevel == RiskLevel.High)}");
+            sb.AppendLine($"Medium: {latest.Count(x => x.RiskLevel == RiskLevel.Medium)}");
+            sb.AppendLine($"Low: {latest.Count(x => x.RiskLevel == RiskLevel.Low)}");
 
             return await SaveAndReturnReport("Risk", sb.ToString());
         }
 
-        // POST: api/report/portfolio — Generate portfolio summary report
+        // ---------------- PORTFOLIO REPORT ----------------
         [HttpPost("portfolio")]
         public async Task<IActionResult> GeneratePortfolioReport([FromQuery] string? className)
         {
@@ -208,65 +211,98 @@ namespace SMS_Backend.Controllers
                 .ToListAsync();
 
             var sb = new StringBuilder();
-            sb.AppendLine("STUDENT PORTFOLIO SUMMARY REPORT");
+            sb.AppendLine("PORTFOLIO REPORT");
             sb.AppendLine($"Generated: {DateTime.UtcNow:yyyy-MM-dd HH:mm} UTC");
-            if (!string.IsNullOrEmpty(className)) sb.AppendLine($"Class: {className}");
-            sb.AppendLine(new string('=', 60));
+            sb.AppendLine(new string('-', 60));
 
             foreach (var p in portfolios)
             {
-                sb.AppendLine($"Student: {p.Student.FirstName} {p.Student.LastName} | Roll: {p.Student.RollNumber} | Class: {p.Student.Class}");
-                sb.AppendLine($"  Attendance  : {p.AttendanceSummary ?? "N/A"}");
-                sb.AppendLine($"  Marks       : {p.MarksSummary ?? "N/A"}");
-                sb.AppendLine($"  Achievements: {p.AchievementsSummary ?? "N/A"}");
-                sb.AppendLine($"  Behavior    : {p.BehaviorSummary ?? "N/A"}");
-                sb.AppendLine(new string('-', 60));
-            }
+                if (p.Student == null) continue;
 
-            sb.AppendLine($"Total Students: {portfolios.Count}");
+                sb.AppendLine($"{p.Student.FirstName} {p.Student.LastName} | {p.Student.Class}");
+                sb.AppendLine($"Attendance: {p.AttendanceSummary ?? "N/A"}");
+                sb.AppendLine($"Marks: {p.MarksSummary ?? "N/A"}");
+                sb.AppendLine($"Achievements: {p.AchievementsSummary ?? "N/A"}");
+                sb.AppendLine($"Behavior: {p.BehaviorSummary ?? "N/A"}");
+                sb.AppendLine(new string('-', 40));
+            }
 
             return await SaveAndReturnReport("Portfolio", sb.ToString());
         }
 
-        // DELETE: api/report/{id}
+        // ---------------- DELETE REPORT ----------------
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteReport(int id)
         {
             var report = await _context.Reports.FindAsync(id);
+
             if (report == null)
                 return NotFound(new { message = "Report not found." });
 
             _context.Reports.Remove(report);
             await _context.SaveChangesAsync();
+
             return Ok(new { message = "Report deleted." });
         }
 
-        // ── Private Helper ─────────────────────────────────────────────────
+        // ---------------- DOWNLOAD REPORT ----------------
+        [HttpGet("download")]
+        public IActionResult Download([FromQuery] string path)
+        {
+            if (string.IsNullOrEmpty(path))
+                return BadRequest("Invalid path");
+
+            var fullPath = Path.Combine(Directory.GetCurrentDirectory(), path);
+
+            if (!System.IO.File.Exists(fullPath))
+                return NotFound("File not found");
+
+            var bytes = System.IO.File.ReadAllBytes(fullPath);
+
+            return File(bytes, "application/pdf", Path.GetFileName(fullPath));
+        }
+
+        // ---------------- SAVE + GENERATE PDF ----------------
         private async Task<IActionResult> SaveAndReturnReport(string type, string content)
         {
             var currentUserId = GetCurrentUserId();
             var admin = await _context.Admins.FirstOrDefaultAsync(a => a.UserId == currentUserId);
+
             if (admin == null)
                 return BadRequest(new { message = "Admin profile not found." });
 
-            var fileName = $"{type}_Report_{DateTime.UtcNow:yyyyMMdd_HHmmss}.txt";
-            var filePath = Path.Combine("Reports", fileName);
+            var fileName = $"{type}_Report_{DateTime.UtcNow:yyyyMMdd_HHmmss}.pdf";
+            var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "Reports");
 
-            // Persist report metadata to DB
+            if (!Directory.Exists(folderPath))
+                Directory.CreateDirectory(folderPath);
+
+            var filePath = Path.Combine(folderPath, fileName);
+            var writer = new PdfWriter(filePath, new WriterProperties());
+
+            using (var pdf = new PdfDocument(writer))
+            using (var doc = new Document(pdf))
+            {
+                doc.Add(new Paragraph($"{type.ToUpper()} REPORT"));
+                doc.Add(new Paragraph($"Generated: {DateTime.UtcNow} UTC"));
+                doc.Add(new Paragraph("-----------------------------------"));
+                doc.Add(new Paragraph(content));
+            }
+
             var report = new Report
             {
-                AdminId     = admin.AdminId,
-                Type        = type,
+                AdminId = admin.AdminId,
+                Type = type,
                 GeneratedOn = DateTime.UtcNow,
-                FilePath    = filePath
+                FilePath = Path.Combine("Reports", fileName)
             };
 
             _context.Reports.Add(report);
             await _context.SaveChangesAsync();
 
-            // Return as downloadable file
-            var bytes = Encoding.UTF8.GetBytes(content);
-            return File(bytes, "text/plain", fileName);
+            var bytes = await System.IO.File.ReadAllBytesAsync(filePath);
+
+            return File(bytes, "application/pdf", fileName);
         }
     }
 }

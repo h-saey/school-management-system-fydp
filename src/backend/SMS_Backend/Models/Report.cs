@@ -27,5 +27,8 @@ namespace SMS_Backend.Models
 
         [ForeignKey("AdminId")]
         public Admin Admin { get; set; } = null!;
+
+        public string FileType { get; set; } = "pdf";
+
     }
 }

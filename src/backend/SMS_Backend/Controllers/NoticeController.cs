@@ -60,12 +60,15 @@ namespace SMS_Backend.Controllers
                 .OrderByDescending(n => n.PostedAt)
                 .Select(n => new
                 {
-                    n.NoticeId,
-                    n.Title,
-                    n.Content,
-                    n.Audience,
-                    n.TargetClass,
-                    n.PostedAt,
+                    noticeId = n.NoticeId,
+                    title = n.Title,
+                    content = n.Content,
+                    type = n.Type,
+                    priority = n.Priority,
+                    audience = n.Audience,
+                    targetClass = n.TargetClass,
+                    postedAt = n.PostedAt,
+                    isActive = n.IsActive,
                     PostedBy = new { n.PostedBy.Username, n.PostedBy.Role }
                 })
                 .ToListAsync();
@@ -118,6 +121,8 @@ namespace SMS_Backend.Controllers
                 PostedByUserId = currentUserId,
                 Title          = dto.Title,
                 Content        = dto.Content,
+                Type = dto.Type,          
+                Priority = dto.Priority,
                 Audience       = dto.Audience,
                 TargetClass    = dto.TargetClass,
                 PostedAt       = DateTime.UtcNow,
@@ -151,6 +156,8 @@ namespace SMS_Backend.Controllers
             if (!string.IsNullOrWhiteSpace(dto.Content)) notice.Content     = dto.Content;
             if (dto.Audience.HasValue)                   notice.Audience    = dto.Audience.Value;
             if (dto.TargetClass != null)                 notice.TargetClass = dto.TargetClass;
+            notice.Type = dto.Type;
+            notice.Priority = dto.Priority;
 
             await _context.SaveChangesAsync();
             return Ok(new { message = "Notice updated successfully." });
@@ -216,8 +223,15 @@ namespace SMS_Backend.Controllers
     public class PostNoticeDto
     {
         public string Title { get; set; } = string.Empty;
+
         public string Content { get; set; } = string.Empty;
-        public NoticeAudience Audience { get; set; } = NoticeAudience.SchoolWide;
+
+        public NoticeType Type { get; set; }
+
+        public NoticePriority Priority { get; set; }
+
+        public NoticeAudience Audience { get; set; }
+
         public string? TargetClass { get; set; }
     }
 
@@ -226,6 +240,8 @@ namespace SMS_Backend.Controllers
         public string? Title { get; set; }
         public string? Content { get; set; }
         public NoticeAudience? Audience { get; set; }
+        public NoticeType Type { get; set; }
+        public NoticePriority Priority { get; set; }
         public string? TargetClass { get; set; }
     }
 }

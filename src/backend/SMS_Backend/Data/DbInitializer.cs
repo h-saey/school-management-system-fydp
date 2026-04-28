@@ -211,6 +211,33 @@ namespace SMS_Backend.Data
                 Status = NotificationStatus.Unread
             };
 
+            var notice1 = new Notice
+            {
+                Title = "Final Exam Schedule Released",
+                Content = "Final exams will start from Monday.",
+                Type = NoticeType.Exam,
+                Priority = NoticePriority.High,
+                Audience = NoticeAudience.SchoolWide,
+                PostedAt = DateTime.Now,
+                IsActive = true,
+                PostedByUserId = adminUser.UserId
+            };
+
+            var notice2 = new Notice
+            {
+                Title = "Winter Vacation Notice",
+                Content = "School will remain closed from Dec 20.",
+                Type = NoticeType.Holiday,
+                Priority = NoticePriority.Medium,
+                Audience = NoticeAudience.SchoolWide,
+                PostedAt = DateTime.Now,
+                IsActive = true,
+                PostedByUserId = adminUser.UserId
+            };
+
+            context.Notices.AddRange(notice1, notice2);
+
+
             context.Notifications.Add(notification);
 
             context.SaveChanges();
