@@ -61,10 +61,16 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll",
-        policy => policy.AllowAnyOrigin()
-                        .AllowAnyHeader()
-                        .AllowAnyMethod());
+        policy =>
+        {
+            policy
+              // .SetIsOriginAllowed(_ => true)
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials();
+        });
 });
+
 
 
 
@@ -120,6 +126,7 @@ app.UseSwagger();
  app.UseSwaggerUI();
 //app.UseHttpsRedirection();
 app.UseRouting();
+
 app.UseCors("AllowAll");
 
 
