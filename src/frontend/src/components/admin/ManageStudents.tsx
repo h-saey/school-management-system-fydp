@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { Users, Plus, Edit, Trash2, Search } from "lucide-react";
+import { Users, Plus, Edit, Trash2, Search, X } from "lucide-react";
+import {
+  getStudents,
+  createStudent,
+  updateStudent,
+  deleteStudent,
+} from "../../services/api";
+import { useToast, ToastContainer } from "../../utils/useToast";
 
 type Student = {
   studentId: number;
@@ -9,44 +16,40 @@ type Student = {
   class: string;
   section: string;
   rollNumber: string;
+  email?: string;
+  isActive?: boolean;
+};
+
+const emptyForm = {
+  userId: "",
+  firstName: "",
+  lastName: "",
+  class: "",
+  section: "",
+  rollNumber: "",
 };
 
 export function ManageStudents() {
+  const { toasts, success, error } = useToast();
+
   const [students, setStudents] = useState<Student[]>([]);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [editStudent, setEditStudent] = useState<Student | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
+  const [fetching, setFetching] = useState(true);
+  const [newStudent, setNewStudent] = useState(emptyForm);
 
-  const [newStudent, setNewStudent] = useState({
-    userId: "",
-    firstName: "",
-    lastName: "",
-    class: "",
-    section: "",
-    rollNumber: "",
-  });
-
-  // ================================
-  // FETCH STUDENTS
-  // ================================
-
+  // ── Fetch ────────────────────────────────────────────────
   const fetchStudents = async () => {
     try {
-      const token = localStorage.getItem("token");
-
-      const response = await fetch("http://localhost:5036/api/Student", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      const data = await response.json();
-
-      console.log("Students:", data);
-
+      setFetching(true);
+      const data = await getStudents();
       setStudents(data);
-    } catch (error) {
-      console.error("Error fetching students:", error);
+    } catch (err: any) {
+      error(err.message ?? "Failed to load students");
+    } finally {
+      setFetching(false);
     }
   };
 
@@ -54,120 +57,91 @@ export function ManageStudents() {
     fetchStudents();
   }, []);
 
-  // ================================
-  // ADD STUDENT
-  // ================================
-
-  const handleAddStudent = async (e: React.FormEvent) => {
+  // ── Create ───────────────────────────────────────────────
+  const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
-
     setLoading(true);
-
     try {
-      const token = localStorage.getItem("token");
-
-      const response = await fetch("http://localhost:5036/api/Student", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          userId: Number(newStudent.userId), // ⭐ IMPORTANT FIX
-          firstName: newStudent.firstName,
-          lastName: newStudent.lastName,
-          class: newStudent.class,
-          section: newStudent.section,
-          rollNumber: newStudent.rollNumber,
-        }),
+      await createStudent({
+        userId: Number(newStudent.userId),
+        firstName: newStudent.firstName,
+        lastName: newStudent.lastName,
+        class: newStudent.class,
+        section: newStudent.section,
+        rollNumber: newStudent.rollNumber,
       });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        alert("Student added successfully ✅");
-
-        setNewStudent({
-          userId: "",
-          firstName: "",
-          lastName: "",
-          class: "",
-          section: "",
-          rollNumber: "",
-        });
-
-        setShowAddForm(false);
-
-        fetchStudents(); // ⭐ reload list
-      } else {
-        alert(JSON.stringify(data)); // ⭐ show real backend error
-      }
-    } catch (error) {
-      console.error(error);
-      alert("Server error");
+      success("Student added successfully");
+      setNewStudent(emptyForm);
+      setShowAddForm(false);
+      fetchStudents();
+    } catch (err: any) {
+      error(err.message ?? "Failed to add student");
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
-  // ================================
-  // DELETE STUDENT
-  // ================================
+  // ── Update ───────────────────────────────────────────────
+  const handleUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editStudent) return;
+    setLoading(true);
+    try {
+      await updateStudent(editStudent.studentId, {
+        firstName: editStudent.firstName,
+        lastName: editStudent.lastName,
+        class: editStudent.class,
+        section: editStudent.section,
+        rollNumber: editStudent.rollNumber,
+      });
+      success("Student updated successfully");
+      setEditStudent(null);
+      fetchStudents();
+    } catch (err: any) {
+      error(err.message ?? "Failed to update student");
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  // ── Delete ───────────────────────────────────────────────
   const handleDelete = async (id: number) => {
-    if (!confirm("Delete this student?")) return;
-
+    if (!window.confirm("Delete this student? This cannot be undone.")) return;
     try {
-      const token = localStorage.getItem("token");
-
-      const response = await fetch(`http://localhost:5036/api/Student/${id}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (response.ok) {
-        alert("Student deleted");
-
-        fetchStudents();
-      } else {
-        alert("Delete failed");
-      }
-    } catch (error) {
-      console.error(error);
+      await deleteStudent(id);
+      success("Student deleted");
+      setStudents((prev) => prev.filter((s) => s.studentId !== id));
+    } catch (err: any) {
+      error(err.message ?? "Failed to delete student");
     }
   };
 
-  // ================================
-  // SEARCH
-  // ================================
-
-  const filteredStudents = students.filter(
-    (student) =>
-      student.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.rollNumber.includes(searchTerm) ||
-      student.class.toLowerCase().includes(searchTerm.toLowerCase()),
+  // ── Search ───────────────────────────────────────────────
+  const filtered = students.filter(
+    (s) =>
+      `${s.firstName} ${s.lastName}`
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      s.rollNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      s.class.toLowerCase().includes(searchTerm.toLowerCase()),
   );
-
-  // ================================
-  // UI
-  // ================================
 
   return (
     <div className="space-y-6">
+      <ToastContainer toasts={toasts} />
+
       {/* HEADER */}
-
-      <div className="flex justify-between">
+      <div className="flex justify-between items-start">
         <div>
-          <h1 className="text-xl font-semibold">Manage Students</h1>
-
-          <p className="text-gray-600">Add and manage students</p>
+          <h1 className="text-gray-900 mb-2">Manage Students</h1>
+          <p className="text-gray-600">Add, edit and manage student profiles</p>
         </div>
-
         <button
-          onClick={() => setShowAddForm(!showAddForm)}
-          className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg"
+          onClick={() => {
+            setShowAddForm(!showAddForm);
+            setEditStudent(null);
+          }}
+          className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
         >
           <Plus className="w-4 h-4" />
           Add Student
@@ -175,112 +149,135 @@ export function ManageStudents() {
       </div>
 
       {/* ADD FORM */}
-
       {showAddForm && (
-        <div className="bg-white p-6 rounded-xl shadow">
-          <h2 className="mb-4 font-medium">Add Student</h2>
-
+        <div className="bg-white rounded-xl shadow-sm p-6">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-gray-900">Add New Student</h2>
+            <button
+              onClick={() => setShowAddForm(false)}
+              className="text-gray-400 hover:text-gray-600"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
           <form
-            onSubmit={handleAddStudent}
-            className="grid md:grid-cols-2 gap-4"
+            onSubmit={handleAdd}
+            className="grid grid-cols-1 md:grid-cols-2 gap-4"
           >
-            <input
-              type="number"
-              placeholder="User ID"
-              value={newStudent.userId}
-              onChange={(e) =>
-                setNewStudent({
-                  ...newStudent,
-                  userId: e.target.value,
-                })
-              }
-              className="border p-2 rounded"
-              required
-            />
-
-            <input
-              type="text"
-              placeholder="First Name"
-              value={newStudent.firstName}
-              onChange={(e) =>
-                setNewStudent({
-                  ...newStudent,
-                  firstName: e.target.value,
-                })
-              }
-              className="border p-2 rounded"
-              required
-            />
-
-            <input
-              type="text"
-              placeholder="Last Name"
-              value={newStudent.lastName}
-              onChange={(e) =>
-                setNewStudent({
-                  ...newStudent,
-                  lastName: e.target.value,
-                })
-              }
-              className="border p-2 rounded"
-              required
-            />
-
-            <input
-              type="text"
-              placeholder="Class"
-              value={newStudent.class}
-              onChange={(e) =>
-                setNewStudent({
-                  ...newStudent,
-                  class: e.target.value,
-                })
-              }
-              className="border p-2 rounded"
-              required
-            />
-
-            <input
-              type="text"
-              placeholder="Section"
-              value={newStudent.section}
-              onChange={(e) =>
-                setNewStudent({
-                  ...newStudent,
-                  section: e.target.value,
-                })
-              }
-              className="border p-2 rounded"
-              required
-            />
-
-            <input
-              type="text"
-              placeholder="Roll Number"
-              value={newStudent.rollNumber}
-              onChange={(e) =>
-                setNewStudent({
-                  ...newStudent,
-                  rollNumber: e.target.value,
-                })
-              }
-              className="border p-2 rounded"
-              required
-            />
-
+            <div>
+              <label className="block text-gray-700 mb-1 text-sm">
+                User ID <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="number"
+                required
+                value={newStudent.userId}
+                onChange={(e) =>
+                  setNewStudent({ ...newStudent, userId: e.target.value })
+                }
+                placeholder="Linked User ID"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+              />
+            </div>
+            <div>
+              <label className="block text-gray-700 mb-1 text-sm">
+                First Name <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                required
+                value={newStudent.firstName}
+                onChange={(e) =>
+                  setNewStudent({ ...newStudent, firstName: e.target.value })
+                }
+                placeholder="First name"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+              />
+            </div>
+            <div>
+              <label className="block text-gray-700 mb-1 text-sm">
+                Last Name <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                required
+                value={newStudent.lastName}
+                onChange={(e) =>
+                  setNewStudent({ ...newStudent, lastName: e.target.value })
+                }
+                placeholder="Last name"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+              />
+            </div>
+            <div>
+              <label className="block text-gray-700 mb-1 text-sm">
+                Class <span className="text-red-500">*</span>
+              </label>
+              <select
+                required
+                value={newStudent.class}
+                onChange={(e) =>
+                  setNewStudent({ ...newStudent, class: e.target.value })
+                }
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+              >
+                <option value="">Select Class</option>
+                {["Class 6", "Class 7", "Class 8", "Class 9", "Class 10"].map(
+                  (c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ),
+                )}
+              </select>
+            </div>
+            <div>
+              <label className="block text-gray-700 mb-1 text-sm">
+                Section <span className="text-red-500">*</span>
+              </label>
+              <select
+                required
+                value={newStudent.section}
+                onChange={(e) =>
+                  setNewStudent({ ...newStudent, section: e.target.value })
+                }
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+              >
+                <option value="">Select Section</option>
+                {["A", "B", "C", "D"].map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-gray-700 mb-1 text-sm">
+                Roll Number <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                required
+                value={newStudent.rollNumber}
+                onChange={(e) =>
+                  setNewStudent({ ...newStudent, rollNumber: e.target.value })
+                }
+                placeholder="e.g. 2024-001"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+              />
+            </div>
             <div className="md:col-span-2 flex gap-3">
               <button
                 type="submit"
                 disabled={loading}
-                className="px-6 py-2 bg-red-600 text-white rounded"
+                className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
               >
                 {loading ? "Adding..." : "Add Student"}
               </button>
-
               <button
                 type="button"
                 onClick={() => setShowAddForm(false)}
-                className="px-6 py-2 border rounded"
+                className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
               >
                 Cancel
               </button>
@@ -289,75 +286,208 @@ export function ManageStudents() {
         </div>
       )}
 
+      {/* EDIT MODAL */}
+      {editStudent && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-40 p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-lg p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-gray-900">Edit Student</h2>
+              <button
+                onClick={() => setEditStudent(null)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <form
+              onSubmit={handleUpdate}
+              className="grid grid-cols-1 md:grid-cols-2 gap-4"
+            >
+              <div>
+                <label className="block text-gray-700 mb-1 text-sm">
+                  First Name
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={editStudent.firstName}
+                  onChange={(e) =>
+                    setEditStudent({
+                      ...editStudent,
+                      firstName: e.target.value,
+                    })
+                  }
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 mb-1 text-sm">
+                  Last Name
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={editStudent.lastName}
+                  onChange={(e) =>
+                    setEditStudent({ ...editStudent, lastName: e.target.value })
+                  }
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 mb-1 text-sm">
+                  Class
+                </label>
+                <select
+                  required
+                  value={editStudent.class}
+                  onChange={(e) =>
+                    setEditStudent({ ...editStudent, class: e.target.value })
+                  }
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                >
+                  {["Class 6", "Class 7", "Class 8", "Class 9", "Class 10"].map(
+                    (c) => (
+                      <option key={c} value={c}>
+                        {c}
+                      </option>
+                    ),
+                  )}
+                </select>
+              </div>
+              <div>
+                <label className="block text-gray-700 mb-1 text-sm">
+                  Section
+                </label>
+                <select
+                  required
+                  value={editStudent.section}
+                  onChange={(e) =>
+                    setEditStudent({ ...editStudent, section: e.target.value })
+                  }
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                >
+                  {["A", "B", "C", "D"].map((s) => (
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-gray-700 mb-1 text-sm">
+                  Roll Number
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={editStudent.rollNumber}
+                  onChange={(e) =>
+                    setEditStudent({
+                      ...editStudent,
+                      rollNumber: e.target.value,
+                    })
+                  }
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                />
+              </div>
+              <div className="md:col-span-2 flex gap-3 pt-2">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
+                >
+                  {loading ? "Saving..." : "Save Changes"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setEditStudent(null)}
+                  className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* SEARCH */}
-
-      <div className="bg-white p-4 rounded-xl shadow">
+      <div className="bg-white rounded-xl shadow-sm p-4">
         <div className="relative">
-          <Search className="w-5 h-5 absolute left-3 top-3 text-gray-400" />
-
+          <Search className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
-            placeholder="Search students..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 border p-2 w-full rounded"
+            placeholder="Search by name, roll number or class..."
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
           />
         </div>
       </div>
 
       {/* TABLE */}
-
-      <div className="bg-white rounded-xl shadow overflow-hidden">
-        <div className="p-4 border-b flex items-center gap-2">
-          <Users className="w-5 h-5 text-red-600" />
-
-          <h2>Student List ({filteredStudents.length})</h2>
+      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+        <div className="p-6 border-b flex items-center gap-3">
+          <Users className="w-6 h-6 text-red-600" />
+          <h2 className="text-gray-900">Student List ({filtered.length})</h2>
         </div>
 
-        <table className="w-full">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="p-3 text-left">Roll</th>
-
-              <th className="p-3 text-left">Name</th>
-
-              <th className="p-3 text-left">Class</th>
-
-              <th className="p-3 text-left">Section</th>
-
-              <th className="p-3 text-left">Actions</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {filteredStudents.map((student) => (
-              <tr key={student.studentId} className="border-t">
-                <td className="p-3">{student.rollNumber}</td>
-
-                <td className="p-3">
-                  {student.firstName} {student.lastName}
-                </td>
-
-                <td className="p-3">{student.class}</td>
-
-                <td className="p-3">{student.section}</td>
-
-                <td className="p-3 flex gap-2">
-                  <button className="p-2 text-blue-600">
-                    <Edit size={16} />
-                  </button>
-
-                  <button
-                    onClick={() => handleDelete(student.studentId)}
-                    className="p-2 text-red-600"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        {fetching ? (
+          <div className="p-8 text-center text-gray-500">
+            Loading students...
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="p-8 text-center text-gray-400">
+            {searchTerm
+              ? "No students match your search."
+              : "No students found. Add one above."}
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-4 text-left text-gray-700">Roll No</th>
+                  <th className="px-6 py-4 text-left text-gray-700">Name</th>
+                  <th className="px-6 py-4 text-left text-gray-700">Class</th>
+                  <th className="px-6 py-4 text-left text-gray-700">Section</th>
+                  <th className="px-6 py-4 text-left text-gray-700">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {filtered.map((s) => (
+                  <tr key={s.studentId} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 text-gray-700">{s.rollNumber}</td>
+                    <td className="px-6 py-4 text-gray-900 font-medium">
+                      {s.firstName} {s.lastName}
+                    </td>
+                    <td className="px-6 py-4 text-gray-700">{s.class}</td>
+                    <td className="px-6 py-4 text-gray-700">{s.section}</td>
+                    <td className="px-6 py-4">
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => setEditStudent(s)}
+                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                          title="Edit"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(s.studentId)}
+                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          title="Delete"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );
