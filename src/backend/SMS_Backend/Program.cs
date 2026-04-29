@@ -106,17 +106,18 @@ using (var scope = app.Services.CreateScope())
     var services = scope.ServiceProvider;
     var context = services.GetRequiredService<ApplicationDbContext>();
 
-    DbInitializer.Seed(context);
+    //DbInitializer.Seed(context);
 }
 
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
+//if (app.Environment.IsDevelopment())
+//{
+//    app.UseSwagger();
+//    app.UseSwaggerUI();
+//}
+app.UseSwagger();
+ app.UseSwaggerUI();
 //app.UseHttpsRedirection();
 app.UseRouting();
 app.UseCors("AllowAll");

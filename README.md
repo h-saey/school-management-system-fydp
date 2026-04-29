@@ -8,12 +8,12 @@ for a School Management System.
 ## Current Phase
 
 ✔ Frontend Prototype completed  
-⏳ Backend under development
+⏳ Backend In Progress
 
 ## Repository Structure
 
 - src/frontend → Frontend prototype (Vite-based)
-- src/backend → Backend (to be implemented)
+- src/backend → Backend (In Progress)
 - docs → Project documentation
 - assets → Screenshots and diagrams
 

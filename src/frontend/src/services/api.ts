@@ -3,7 +3,8 @@
 //  All endpoints use API_BASE, JWT token, and typed responses
 // ============================================================
 
-export const API_BASE = "http://localhost:5036/api";
+//export const API_BASE = "http://localhost:5036/api";
+export const API_BASE = "http://localhost:5000/api";
 
 const getToken = (): string => localStorage.getItem("token") ?? "";
 
@@ -104,7 +105,7 @@ export const deleteAttendance = (id: number) =>
 
 // ══════════════════════════════════════════════════════════════
 // MARKS  (fixed: was /mark, now /marks)
-// ══════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════
 export const getMarks = () => request<any[]>(`${API_BASE}/mark`);
 export const updateMarks = (
   id: number,
