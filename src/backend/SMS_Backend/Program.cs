@@ -64,7 +64,7 @@ builder.Services.AddCors(options =>
         policy =>
         {
             policy
-              // .SetIsOriginAllowed(_ => true)
+              .SetIsOriginAllowed(_ => true)
                 .AllowAnyHeader()
                 .AllowAnyMethod()
                 .AllowCredentials();
@@ -102,6 +102,11 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+builder.Services.AddScoped<SMS_Backend.Services.RiskService>();
+builder.Services.AddScoped<SMS_Backend.Services.RecommendationService>();
+builder.Services.AddScoped<SMS_Backend.Services.SimulationService>();
+builder.Services.AddSingleton<SMS_Backend.ML.ModelTrainer>();
+
 builder.Services.AddAuthorization();
 builder.Services.AddScoped<JwtService>();
 
@@ -117,13 +122,13 @@ using (var scope = app.Services.CreateScope())
 
 
 // Configure the HTTP request pipeline.
-//if (app.Environment.IsDevelopment())
-//{
-//    app.UseSwagger();
-//    app.UseSwaggerUI();
-//}
-app.UseSwagger();
- app.UseSwaggerUI();
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+//app.UseSwagger();
+// app.UseSwaggerUI();
 //app.UseHttpsRedirection();
 app.UseRouting();
 
