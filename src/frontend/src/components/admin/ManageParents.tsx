@@ -127,8 +127,10 @@ export function ManageParents() {
         headers: authHeaders(),
       });
       if (!res.ok) {
-        const d = await res.json();
-        throw new Error(d?.message);
+        //const d = await res.json();
+        //throw new Error(d?.message);
+        const d = await res.text();
+        throw new Error(d);
       }
       success("Parent deleted");
       setParents((prev) => prev.filter((p) => p.parentId !== id));

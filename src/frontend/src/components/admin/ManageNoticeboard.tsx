@@ -13,8 +13,8 @@ export function ManageNoticeboard() {
     title: "",
     content: "",
     audience: "SchoolWide",
-    type: "",
-    priority: "",
+    type: "Exam",
+    priority: "High",
     targetClass: "",
   });
 
