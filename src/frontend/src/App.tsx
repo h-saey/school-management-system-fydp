@@ -42,7 +42,7 @@ function AppContent() {
 
       {/* ✅ AIWidget placed here — sibling of dashboards, not inside them */}
       {/* Visible for ALL roles automatically */}
-      <AIWidget />
+      <AIWidget userRole={currentUser.role} />
     </div>
   );
 }

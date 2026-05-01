@@ -1,8 +1,9 @@
 import React, { useState } from "react";
-import { Brain, X } from "lucide-react";
+import { Brain, User, X } from "lucide-react";
 import { AIPanel } from "./AIPanel";
+import { UserRole } from "../../App";
 
-export function AIWidget() {
+export function AIWidget({ userRole }: { userRole: UserRole }) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -54,7 +55,9 @@ export function AIWidget() {
       )}
 
       {/* AI Panel */}
-      {open && <AIPanel onClose={() => setOpen(false)} />}
+      {open && (
+        <AIPanel onClose={() => setOpen(false)} /*userRole={userRole}*/ />
+      )}
     </>
   );
 }
