@@ -1,0 +1,151 @@
+
+======================================================
+  SMS-FYP BACKEND — COMPLETE FOLDER STRUCTURE
+======================================================
+
+SMS-FYP/
+├── Doc/
+└── src/
+    ├── Front-end/                        ← React (already exists)
+    └── Backend/
+        ├── SMS_Backend.csproj
+        ├── Program.cs
+        ├── appsettings.json
+        │
+        ├── Data/
+        │   └── ApplicationDbContext.cs   ← Add Notices DbSet here (see below)
+        │
+        ├── Models/                       ← 18 models total (Notice.cs is new)
+        │   ├── User.cs
+        │   ├── Student.cs
+        │   ├── Teacher.cs
+        │   ├── Parent.cs
+        │   ├── Admin.cs
+        │   ├── Attendance.cs
+        │   ├── Mark.cs
+        │   ├── Achievement.cs
+        │   ├── BehaviorRemark.cs
+        │   ├── Complaint.cs
+        │   ├── Fee.cs
+        │   ├── Notification.cs
+        │   ├── Message.cs
+        │   ├── Notice.cs                 ← NEW — add this model
+        │   ├── StudentPortfolio.cs
+        │   ├── RiskMonitoring.cs
+        │   ├── AuditLog.cs
+        │   └── Report.cs
+        │
+        ├── Controllers/                  ← 17 controllers total
+        │   ├── AuthController.cs         ← Already exists (JWT login/register)
+        │   ├── UserController.cs
+        │   ├── StudentController.cs
+        │   ├── TeacherController.cs
+        │   ├── ParentController.cs
+        │   ├── AdminController.cs
+        │   ├── AttendanceController.cs
+        │   ├── MarksController.cs
+        │   ├── FeeController.cs
+        │   ├── ComplaintController.cs
+        │   ├── NotificationController.cs
+        │   ├── MessageController.cs
+        │   ├── BehaviorRemarkController.cs
+        │   ├── AchievementController.cs
+        │   ├── RiskMonitoringController.cs
+        │   ├── StudentPortfolioController.cs
+        │   ├── NoticeController.cs       ← NEW — was missing from your list
+        │   ├── AuditLogController.cs
+        │   └── ReportController.cs
+        │
+        └── Migrations/                   ← EF Core auto-generated
+
+
+======================================================
+  APPLICATIONDBCONTEXT.CS — REQUIRED ADDITIONS
+======================================================
+
+Add these two lines to your existing ApplicationDbContext:
+
+    // Inside ApplicationDbContext class:
+    public DbSet<Notice> Notices { get; set; }
+
+    // Inside OnModelCreating, add this block to handle Notice FK:
+    modelBuilder.Entity<Notice>()
+        .HasOne(n => n.PostedBy)
+        .WithMany()
+        .HasForeignKey(n => n.PostedByUserId)
+        .OnDelete(DeleteBehavior.Restrict);
+
+Then run:
+    dotnet ef migrations add AddNoticeTable
+    dotnet ef database update
+
+
+======================================================
+  ROLE-BASED ACCESS CONTROL SUMMARY
+======================================================
+
+Endpoint Category         Admin   Teacher  Student  Parent
+─────────────────────────────────────────────────────────
+User Management           CRUD    —        —        —
+Student Profiles          CRUD    Read     Read Own —
+Teacher Profiles          CRUD    Read Own —        —
+Parent Profiles           CRUD    —        —        Read Own
+Admin Profiles            CRUD    —        —        —
+Attendance                CRUD    CRU      Read Own Read Linked
+Marks                     CRUD    CRU      Read Own Read Linked
+Fees                      CRUD    —        Read Own Read Linked
+Complaints                CRUD    RU       CR       CR
+Notifications             CRUD    —        Read Own Read Own
+Messages                  CRUD    CRU      —        CRU
+Behavior Remarks          CRUD    CRU      Read Own Read Linked
+Achievements              CRUD    CRU      Read Own Read Linked
+Risk Monitoring           CRUD    CRU      —        Read Linked
+Student Portfolios        CRUD    CR+Read  Read Own Read Linked
+Notices                   CRUD    CRU      Read     Read
+Audit Logs                Read    —        —        —
+Reports                   CRUD    —        —        —
+
+Legend: C=Create  R=Read  U=Update  D=Delete
+
+
+======================================================
+  REQUIRED NUGET PACKAGES
+======================================================
+
+dotnet add package Microsoft.AspNetCore.Authentication.JwtBearer
+dotnet add package Microsoft.EntityFrameworkCore.SqlServer
+dotnet add package Microsoft.EntityFrameworkCore.Tools
+dotnet add package Microsoft.AspNetCore.Identity.EntityFrameworkCore
+
+
+======================================================
+  AUDIT LOG SERVICE (RECOMMENDED)
+======================================================
+
+Create Services/AuditLogService.cs with:
+
+    public class AuditLogService
+    {
+        private readonly ApplicationDbContext _context;
+        public AuditLogService(ApplicationDbContext context) => _context = context;
+
+        public async Task LogAsync(int userId, string action, string? details = null)
+        {
+            _context.AuditLogs.Add(new AuditLog
+            {
+                UserId    = userId,
+                Action    = action,
+                Timestamp = DateTime.UtcNow,
+                Details   = details
+            });
+            await _context.SaveChangesAsync();
+        }
+    }
+
+Register in Program.cs:
+    builder.Services.AddScoped<AuditLogService>();
+
+Inject and call in any controller:
+    await _auditLog.LogAsync(userId, "LOGIN", $"User {username} logged in.");
+    await _auditLog.LogAsync(userId, "MARK_ATTENDANCE", $"StudentId={studentId}");
+    await _auditLog.LogAsync(userId, "UPDATE_MARKS", $"MarksId={id}");

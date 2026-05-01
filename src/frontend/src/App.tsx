@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Login } from "./components/Login";
 import { StudentDashboard } from "./components/student/StudentDashboard";
 import { ParentDashboard } from "./components/parent/ParentDashboard";
@@ -6,6 +6,7 @@ import { TeacherDashboard } from "./components/teacher/TeacherDashboard";
 import { AdminDashboard } from "./components/admin/AdminDashboard";
 import { AppProvider, useApp } from "./contexts/AppContext";
 import { Toaster } from "sonner";
+import { AIWidget } from "./components/ai/AIWidget";
 
 export type UserRole = "student" | "parent" | "teacher" | "admin";
 
@@ -22,10 +23,9 @@ function AppContent() {
   if (!isAuthenticated || !currentUser) {
     return <Login />;
   }
-  console.log("USER:", currentUser);
-  console.log("AUTH:", isAuthenticated);
 
   return (
+    // ✅ NO overflow-hidden here — that clips fixed children
     <div className="min-h-screen bg-gray-50">
       {currentUser.role === "student" && (
         <StudentDashboard user={currentUser} onLogout={logout} />
@@ -39,6 +39,10 @@ function AppContent() {
       {currentUser.role === "admin" && (
         <AdminDashboard user={currentUser} onLogout={logout} />
       )}
+
+      {/* ✅ AIWidget placed here — sibling of dashboards, not inside them */}
+      {/* Visible for ALL roles automatically */}
+      <AIWidget />
     </div>
   );
 }

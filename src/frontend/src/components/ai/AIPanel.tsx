@@ -26,33 +26,27 @@ interface AIPanelProps {
 
 const riskColor = (level: string) =>
   level === "High"
-    ? "text-red-600   bg-red-50   border-red-200"
+    ? "text-red-600 bg-red-50 border-red-200"
     : level === "Medium"
       ? "text-yellow-600 bg-yellow-50 border-yellow-200"
-      : "text-green-600  bg-green-50  border-green-200";
+      : "text-green-600 bg-green-50 border-green-200";
 
 const priorityColor = (p: string) =>
   p === "High"
-    ? "bg-red-100    text-red-700"
+    ? "bg-red-100 text-red-700"
     : p === "Medium"
       ? "bg-yellow-100 text-yellow-700"
-      : "bg-green-100  text-green-700";
+      : "bg-green-100 text-green-700";
 
 export function AIPanel({ onClose }: AIPanelProps) {
   const [tab, setTab] = useState<Tab>("predict");
   const [studentId, setStudentId] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
-  // Prediction state
   const [prediction, setPrediction] = useState<RiskPrediction | null>(null);
-
-  // Recommendations state
   const [recResult, setRecResult] = useState<RecommendationResponse | null>(
     null,
   );
-
-  // Simulation state
   const [attInc, setAttInc] = useState("10");
   const [marksInc, setMarksInc] = useState("10");
   const [simResult, setSimResult] = useState<{
@@ -62,7 +56,6 @@ export function AIPanel({ onClose }: AIPanelProps) {
 
   const clearError = () => setError("");
 
-  // ── PREDICT ────────────────────────────────────────────────
   const handlePredict = async () => {
     const id = parseInt(studentId);
     if (isNaN(id) || id <= 0) {
@@ -72,8 +65,7 @@ export function AIPanel({ onClose }: AIPanelProps) {
     setLoading(true);
     clearError();
     try {
-      const result = await predictRisk(id);
-      setPrediction(result);
+      setPrediction(await predictRisk(id));
     } catch (e: any) {
       setError(e.message ?? "Prediction failed");
     } finally {
@@ -81,7 +73,6 @@ export function AIPanel({ onClose }: AIPanelProps) {
     }
   };
 
-  // ── RECOMMEND ──────────────────────────────────────────────
   const handleRecommend = async () => {
     const id = parseInt(studentId);
     if (isNaN(id) || id <= 0) {
@@ -91,8 +82,7 @@ export function AIPanel({ onClose }: AIPanelProps) {
     setLoading(true);
     clearError();
     try {
-      const result = await getRecommendations(id);
-      setRecResult(result);
+      setRecResult(await getRecommendations(id));
     } catch (e: any) {
       setError(e.message ?? "Failed to get recommendations");
     } finally {
@@ -100,7 +90,6 @@ export function AIPanel({ onClose }: AIPanelProps) {
     }
   };
 
-  // ── SIMULATE ───────────────────────────────────────────────
   const handleSimulate = async () => {
     const id = parseInt(studentId);
     const att = parseFloat(attInc);
@@ -137,7 +126,24 @@ export function AIPanel({ onClose }: AIPanelProps) {
   };
 
   return (
-    <div className="fixed bottom-20 right-4 z-50 w-96 max-h-[80vh] bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col overflow-hidden">
+    // ✅ ALL positioning via inline style — guaranteed to show above everything
+    <div
+      style={{
+        position: "fixed",
+        bottom: "96px", // sits above the 56px button + gap
+        right: "16px",
+        zIndex: 9998,
+        width: "384px",
+        maxHeight: "80vh",
+        backgroundColor: "white",
+        borderRadius: "16px",
+        boxShadow: "0 8px 40px rgba(0,0,0,0.18)",
+        border: "1px solid #e5e7eb",
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",
+      }}
+    >
       {/* HEADER */}
       <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white">
         <div className="flex items-center gap-2">
@@ -176,9 +182,9 @@ export function AIPanel({ onClose }: AIPanelProps) {
         ))}
       </div>
 
-      {/* BODY — scrollable */}
+      {/* BODY */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {/* Student ID input — shared across tabs */}
+        {/* Student ID */}
         <div>
           <label className="block text-gray-700 text-sm mb-1 font-medium">
             Student ID
@@ -199,7 +205,7 @@ export function AIPanel({ onClose }: AIPanelProps) {
               <button
                 onClick={handlePredict}
                 disabled={loading}
-                className="px-3 py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center gap-1"
+                className="px-3 py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 disabled:opacity-50 flex items-center gap-1"
               >
                 {loading ? (
                   <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -213,7 +219,7 @@ export function AIPanel({ onClose }: AIPanelProps) {
               <button
                 onClick={handleRecommend}
                 disabled={loading}
-                className="px-3 py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center gap-1"
+                className="px-3 py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 disabled:opacity-50 flex items-center gap-1"
               >
                 {loading ? (
                   <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -233,7 +239,7 @@ export function AIPanel({ onClose }: AIPanelProps) {
           </div>
         )}
 
-        {/* ── PREDICT RESULTS ──────────────────────────── */}
+        {/* ── PREDICT RESULTS ── */}
         {tab === "predict" && prediction && (
           <div className="space-y-3">
             <div
@@ -245,11 +251,10 @@ export function AIPanel({ onClose }: AIPanelProps) {
               <p className="text-lg font-bold">{prediction.finalRisk} Risk</p>
               {prediction.mlModelUsed && (
                 <span className="text-xs bg-white bg-opacity-60 px-2 py-0.5 rounded-full">
-                  ML.NET model used
+                  ML.NET used
                 </span>
               )}
             </div>
-
             <div className="grid grid-cols-3 gap-2">
               {[
                 {
@@ -276,7 +281,6 @@ export function AIPanel({ onClose }: AIPanelProps) {
                 </div>
               ))}
             </div>
-
             <div>
               <p className="text-gray-700 text-xs font-semibold mb-2">
                 Risk Factors:
@@ -296,7 +300,7 @@ export function AIPanel({ onClose }: AIPanelProps) {
           </div>
         )}
 
-        {/* ── RECOMMENDATIONS RESULTS ───────────────────── */}
+        {/* ── RECOMMENDATIONS ── */}
         {tab === "recommend" && recResult && (
           <div className="space-y-3">
             <div className="flex items-center justify-between">
@@ -336,7 +340,7 @@ export function AIPanel({ onClose }: AIPanelProps) {
           </div>
         )}
 
-        {/* ── SIMULATE TAB ─────────────────────────────── */}
+        {/* ── SIMULATE ── */}
         {tab === "simulate" && (
           <div className="space-y-3">
             <div className="grid grid-cols-2 gap-3">
@@ -370,7 +374,7 @@ export function AIPanel({ onClose }: AIPanelProps) {
             <button
               onClick={handleSimulate}
               disabled={loading}
-              className="w-full py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+              className="w-full py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {loading ? (
                 <>
@@ -388,8 +392,6 @@ export function AIPanel({ onClose }: AIPanelProps) {
                 <p className="text-gray-900 font-semibold text-sm">
                   {simResult.studentName}
                 </p>
-
-                {/* Before / After */}
                 <div className="grid grid-cols-2 gap-2">
                   <div
                     className={`rounded-lg border p-3 text-center ${riskColor(simResult.simulation.originalRiskLevel)}`}
@@ -408,8 +410,6 @@ export function AIPanel({ onClose }: AIPanelProps) {
                     </p>
                   </div>
                 </div>
-
-                {/* Improved badge */}
                 {simResult.simulation.riskImproved && (
                   <div className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-lg p-2">
                     <CheckCircle className="w-4 h-4 text-green-600" />
@@ -418,12 +418,9 @@ export function AIPanel({ onClose }: AIPanelProps) {
                     </p>
                   </div>
                 )}
-
                 <p className="text-gray-600 text-xs">
                   {simResult.simulation.message}
                 </p>
-
-                {/* Steps */}
                 <div>
                   <p className="text-gray-700 text-xs font-semibold mb-1">
                     Steps:
