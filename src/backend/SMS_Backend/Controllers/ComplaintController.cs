@@ -36,8 +36,33 @@ namespace SMS_Backend.Controllers
                 .Include(c => c.SubmittedBy)
                 .Include(c => c.AssignedTo);
 
-            if (role == "Student" || role == "Parent")
+            // if (role == "Student" || role == "Parent")
+            //query = query.Where(c => c.SubmittedByUserId == currentUserId);
+
+            if (role == "Student")
+            {
                 query = query.Where(c => c.SubmittedByUserId == currentUserId);
+            }
+            else if (role == "Parent")
+            {
+                // Get linked student IDs
+                var studentIds = await _context.Parents
+                    .Where(p => p.UserId == currentUserId)
+                    .Select(p => p.StudentId)
+                    .ToListAsync();
+
+                // Get student userIds
+                var studentUserIds = await _context.Students
+                    .Where(s => studentIds.Contains(s.StudentId))
+                    .Select(s => s.UserId)
+                    .ToListAsync();
+
+                query = query.Where(c =>
+                    c.SubmittedByUserId == currentUserId // parent's own complaints
+                    || studentUserIds.Contains(c.SubmittedByUserId) // student's complaints
+                );
+            }
+
 
             var result = await query.Select(c => new
             {

@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from "react";
 import {
-  Award,
   FileText,
   Calendar,
   Download,
   Trophy,
-  Star,
-  Medal,
   AlertCircle,
 } from "lucide-react";
+
 import {
   getMyPortfolio,
   getMyMarks,
@@ -20,7 +18,32 @@ import {
   type AchievementRecord,
 } from "../../services/studentApi";
 
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
+} from "recharts";
+
+import jsPDF from "jspdf";
+import * as htmlToImage from "html-to-image";
+
 type Tab = "academics" | "attendance" | "achievements" | "portfolio";
+
+const COLORS = {
+  primary: "#2563eb",
+  green: "#16a34a",
+  red: "#dc2626",
+  yellow: "#f59e0b",
+  gray: "#6b7280",
+  light: "#f8fafc",
+};
 
 export function StudentPortfolio() {
   const [activeTab, setActiveTab] = useState<Tab>("academics");
@@ -31,6 +54,9 @@ export function StudentPortfolio() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const chartRef1 = React.useRef<HTMLDivElement>(null);
+  const chartRef2 = React.useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     async function load() {
       try {
@@ -38,7 +64,7 @@ export function StudentPortfolio() {
           getMyMarks(),
           getMyAttendance(),
           getMyAchievements(),
-          getMyPortfolio().catch(() => null), // portfolio may not exist yet
+          getMyPortfolio(),
         ]);
         setMarks(m);
         setAtt(a);
@@ -53,254 +79,385 @@ export function StudentPortfolio() {
     load();
   }, []);
 
-  // Derived: attendance summary
+  // ================= DERIVED DATA =================
   const total = att.length;
   const present = att.filter((a) => a.status === "Present").length;
   const absent = att.filter((a) => a.status === "Absent").length;
   const late = att.filter((a) => a.status === "Late").length;
-  const attPct = total > 0 ? Math.round(((present + late) / total) * 100) : 0;
+  const attPct = total ? Math.round(((present + late) / total) * 100) : 0;
 
-  // Derived: subject averages
+  const avgMarks =
+    marks.length > 0
+      ? Math.round(marks.reduce((a, b) => a + b.percentage, 0) / marks.length)
+      : 0;
+
   const subjectMap = marks.reduce<Record<string, number[]>>((acc, m) => {
     if (!acc[m.subject]) acc[m.subject] = [];
     acc[m.subject].push(m.percentage);
     return acc;
   }, {});
 
-  const tabs = [
-    { id: "academics" as Tab, label: "Academic Records", icon: FileText },
-    { id: "attendance" as Tab, label: "Attendance Report", icon: Calendar },
-    { id: "achievements" as Tab, label: "Achievements", icon: Trophy },
-    { id: "portfolio" as Tab, label: "Full Portfolio", icon: Award },
+  const subjectChartData = Object.entries(subjectMap).map(([s, p]) => ({
+    subject: s,
+    average: Math.round(p.reduce((a, b) => a + b, 0) / p.length),
+  }));
+
+  const attendanceChartData = [
+    { name: "Present", value: present },
+    { name: "Absent", value: absent },
+    { name: "Late", value: late },
   ];
 
-  if (loading)
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500">Loading portfolio…</div>
-      </div>
+  // ================= PDF EXPORT (NO html2canvas) =================
+  // const handleExportPDF = async () => {
+  //   const pdf = new jsPDF("p", "mm", "a4");
+
+  //   // ===== HEADER =====
+  //   pdf.setFont("helvetica", "bold");
+  //   pdf.setFontSize(18);
+  //   pdf.text("Student Portfolio Report", 15, 20);
+
+  //   pdf.setFontSize(11);
+  //   pdf.setFont("helvetica", "normal");
+  //   pdf.text(`Attendance: ${attPct}%`, 15, 30);
+  //   pdf.text(`Average Marks: ${avgMarks}%`, 15, 37);
+  //   pdf.text(`Achievements: ${ach.length}`, 15, 44);
+
+  //   // ===== CHART 1 =====
+  //   if (chartRef1.current) {
+  //     const img1 = await htmlToImage.toPng(chartRef1.current);
+  //     pdf.addImage(img1, "PNG", 15, 55, 180, 60);
+  //   }
+
+  //   // ===== PAGE BREAK =====
+  //   pdf.addPage();
+
+  //   // ===== ATTENDANCE PIE CHART =====
+  //   if (chartRef2.current) {
+  //     const img2 = await htmlToImage.toPng(chartRef2.current);
+  //     pdf.text("Attendance Breakdown", 15, 20);
+  //     pdf.addImage(img2, "PNG", 15, 30, 180, 80);
+  //   }
+
+  //   // ===== SUMMARY PAGE =====
+  //   pdf.addPage();
+
+  //   pdf.text("Performance Summary", 15, 20);
+
+  //   pdf.text(portfolio?.attendanceSummary || "No attendance data", 15, 35);
+  //   pdf.text(portfolio?.marksSummary || "", 15, 50);
+  //   pdf.text(portfolio?.achievementsSummary || "", 15, 70);
+  //   pdf.text(portfolio?.behaviorSummary || "", 15, 90);
+
+  //   pdf.save("Student_Portfolio.pdf");
+  // };
+  const handleExportPDF = async () => {
+    const pdf = new jsPDF("p", "mm", "a4");
+
+    const W = 210;
+    const H = 297;
+    const margin = 14;
+    const contentW = W - margin * 2;
+
+    let y = 0;
+
+    // ================= HELPERS =================
+    const line = (color = [220, 220, 220]) => {
+      pdf.setDrawColor(color[0], color[1], color[2]);
+      pdf.line(margin, y, W - margin, y);
+      y += 6;
+    };
+
+    const sectionTitle = (text: string) => {
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(13);
+      pdf.setTextColor(30, 41, 59);
+
+      pdf.text(text, margin, y);
+      y += 6;
+
+      pdf.setDrawColor(226, 232, 240);
+      pdf.line(margin, y, W - margin, y);
+      y += 8;
+    };
+
+    const textBlock = (text: string) => {
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(10);
+      pdf.setTextColor(71, 85, 105);
+
+      const lines = pdf.splitTextToSize(text || "No data available", contentW);
+      pdf.text(lines, margin, y);
+      y += lines.length * 5 + 4;
+    };
+
+    const kpiCard = (
+      x: number,
+      y0: number,
+      title: string,
+      value: string,
+      color: number[],
+    ) => {
+      pdf.setFillColor(color[0], color[1], color[2]);
+      pdf.roundedRect(x, y0, 42, 22, 2, 2, "F");
+
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFontSize(9);
+      pdf.text(title, x + 3, y0 + 7);
+
+      pdf.setFontSize(14);
+      pdf.setFont("helvetica", "bold");
+      pdf.text(value, x + 3, y0 + 16);
+    };
+
+    // ================= HEADER =================
+    pdf.setFillColor(37, 99, 235);
+    pdf.rect(0, 0, W, 38, "F");
+
+    pdf.setTextColor(255, 255, 255);
+    pdf.setFont("helvetica", "bold");
+    pdf.setFontSize(18);
+    pdf.text("STUDENT PORTFOLIO REPORT", margin, 18);
+
+    pdf.setFontSize(10);
+    pdf.setFont("helvetica", "normal");
+    pdf.text("Academic Performance & Progress Evaluation", margin, 26);
+
+    pdf.setTextColor(255, 255, 255);
+    pdf.text(`Generated: ${new Date().toLocaleDateString()}`, 140, 26);
+
+    // ================= KPI SECTION =================
+    y = 50;
+
+    const rowY = y;
+
+    kpiCard(margin, rowY, "Attendance", `${attPct}%`, [37, 99, 235]);
+    kpiCard(margin + 46, rowY, "Avg Marks", `${avgMarks}%`, [22, 163, 74]);
+    kpiCard(margin + 92, rowY, "Achievements", `${ach.length}`, [245, 158, 11]);
+    kpiCard(
+      margin + 138,
+      rowY,
+      "Risk Level",
+      attPct > 75 ? "Good" : "Low",
+      attPct > 75 ? [16, 185, 129] : [239, 68, 68],
     );
+
+    y = rowY + 32;
+
+    // ================= PAGE 1 CONTENT =================
+    sectionTitle("ACADEMIC PERFORMANCE SUMMARY");
+    textBlock(portfolio?.marksSummary || "");
+
+    sectionTitle("ATTENDANCE REPORT");
+    textBlock(portfolio?.attendanceSummary || "");
+
+    // ================= PAGE BREAK =================
+    pdf.addPage();
+    y = 20;
+
+    // ================= PAGE 2 =================
+    sectionTitle("ACHIEVEMENTS OVERVIEW");
+    textBlock(portfolio?.achievementsSummary || "");
+
+    sectionTitle("BEHAVIOR & REMARKS");
+    textBlock(portfolio?.behaviorSummary || "");
+
+    // ================= ACADEMIC STATUS BOX =================
+    pdf.setFillColor(248, 250, 252);
+    pdf.roundedRect(margin, y, contentW, 28, 3, 3, "F");
+
+    pdf.setFont("helvetica", "bold");
+    pdf.setFontSize(12);
+    pdf.setTextColor(30, 41, 59);
+    pdf.text("ACADEMIC STATUS", margin + 4, y + 8);
+
+    pdf.setFont("helvetica", "normal");
+    pdf.setFontSize(10);
+
+    const status =
+      attPct >= 75 ? "Eligible for Promotion" : "Needs Improvement";
+
+    pdf.text(`Status: ${status}`, margin + 4, y + 18);
+    pdf.text(
+      `Attendance: ${attPct}% | Average: ${avgMarks}%`,
+      margin + 4,
+      y + 24,
+    );
+
+    y += 40;
+
+    // ================= PAGE 3 (RESUME STYLE SUMMARY) =================
+    pdf.addPage();
+
+    pdf.setFillColor(240, 249, 255);
+    pdf.rect(0, 0, W, H, "F");
+
+    pdf.setFont("helvetica", "bold");
+    pdf.setFontSize(18);
+    pdf.setTextColor(37, 99, 235);
+    pdf.text("STUDENT PROFILE SUMMARY", margin, 25);
+
+    const boxes = [
+      `Attendance Rate: ${attPct}%`,
+      `Average Marks: ${avgMarks}%`,
+      `Total Achievements: ${ach.length}`,
+      `Academic Standing: ${attPct > 75 ? "Good Standing" : "At Risk"}`,
+    ];
+
+    let boxY = 45;
+
+    boxes.forEach((b) => {
+      pdf.setFillColor(255, 255, 255);
+      pdf.roundedRect(margin, boxY, contentW, 16, 2, 2, "F");
+
+      pdf.setTextColor(30, 41, 59);
+      pdf.setFontSize(11);
+      pdf.text(b, margin + 6, boxY + 10);
+
+      boxY += 22;
+    });
+
+    // ================= FOOTER =================
+    pdf.setFontSize(9);
+    pdf.setTextColor(100, 116, 139);
+    pdf.text(
+      "Generated by Student Management System • Confidential Academic Report",
+      margin,
+      285,
+    );
+
+    pdf.save("Student_Portfolio_Report.pdf");
+  };
+
+  if (loading) return <div className="p-10 text-center">Loading...</div>;
 
   if (error)
     return (
-      <div className="p-6 bg-red-50 rounded-xl border border-red-200 text-red-700">
-        <AlertCircle className="inline w-4 h-4 mr-2" />
+      <div className="p-6 bg-red-50 text-red-700">
+        <AlertCircle className="inline mr-2" />
         {error}
       </div>
     );
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-start justify-between flex-wrap gap-4">
-        <div>
-          <h1 className="text-gray-900 text-xl font-semibold mb-1">
-            Student Portfolio
-          </h1>
-          <p className="text-gray-500 text-sm">
-            Comprehensive record of your academic journey
-          </p>
-        </div>
+      {/* HEADER */}
+      <div className="flex justify-between">
+        <h1 className="text-xl font-bold">Student Portfolio</h1>
+
         <button
-          onClick={() => alert("PDF export will be implemented here")}
-          className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all active:scale-95 text-sm font-medium"
+          onClick={handleExportPDF}
+          className="bg-blue-600 text-white px-4 py-2 rounded"
         >
-          <Download className="w-4 h-4" />
-          Export Portfolio PDF
+          <Download className="inline w-4 h-4 mr-1" />
+          Export PDF
         </button>
       </div>
 
-      {/* Tab navigation */}
-      <div className="bg-white rounded-xl shadow-sm p-2">
-        <div className="flex gap-2 overflow-x-auto scrollbar-hide">
-          {tabs.map((t) => {
-            const Icon = t.icon;
-            return (
-              <button
-                key={t.id}
-                onClick={() => setActiveTab(t.id)}
-                className={`flex items-center gap-2 whitespace-nowrap px-4 py-2.5 rounded-lg text-sm transition-all duration-200 ${
-                  activeTab === t.id
-                    ? "bg-blue-600 text-white shadow-sm"
-                    : "text-gray-600 hover:bg-gray-100"
-                }`}
-              >
-                <Icon className="w-4 h-4" />
-                <span>{t.label}</span>
-              </button>
-            );
-          })}
+      {/* KPI CARDS */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <Card
+          title="Attendance"
+          value={`${attPct}%`}
+          icon={<Calendar className="w-5 h-5" />}
+          color="bg-blue-500"
+        />
+
+        <Card
+          title="Avg Marks"
+          value={`${avgMarks}%`}
+          icon={<FileText className="w-5 h-5" />}
+          color="bg-green-500"
+        />
+
+        <Card
+          title="Achievements"
+          value={ach.length}
+          icon={<Trophy className="w-5 h-5" />}
+          color="bg-yellow-500"
+        />
+
+        <Card
+          title="Remarks"
+          value={portfolio?.behaviorSummary ?? "0"}
+          icon={<AlertCircle className="w-5 h-5" />}
+          color="bg-red-500"
+        />
+      </div>
+
+      {/* CHARTS (IMPORTANT: REF FOR PDF) */}
+      <div className="grid md:grid-cols-2 gap-6">
+        <div ref={chartRef1} className="bg-white p-4 rounded">
+          <h3>Marks by Subject</h3>
+          <ResponsiveContainer width="100%" height={250}>
+            <BarChart data={subjectChartData}>
+              <XAxis dataKey="subject" />
+              <YAxis />
+              <Tooltip />
+              <Bar dataKey="average" fill="#3b82f6" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        <div ref={chartRef2} className="bg-white p-4 rounded">
+          <h3>Attendance</h3>
+          <ResponsiveContainer width="100%" height={250}>
+            <PieChart>
+              <Pie data={attendanceChartData} dataKey="value" label>
+                {attendanceChartData.map((_, i) => (
+                  <Cell key={i} fill={["#22c55e", "#ef4444", "#f59e0b"][i]} />
+                ))}
+              </Pie>
+              <Tooltip />
+              <Legend />
+            </PieChart>
+          </ResponsiveContainer>
         </div>
       </div>
 
-      {/* ── Academic Records ── */}
-      {activeTab === "academics" && (
-        <div className="bg-white rounded-xl shadow-sm p-6">
-          <h2 className="text-gray-900 font-medium mb-5">
-            Subject-wise Performance
-          </h2>
-          {Object.keys(subjectMap).length === 0 ? (
-            <p className="text-gray-400 text-sm">No marks recorded yet.</p>
-          ) : (
-            <div className="space-y-3">
-              {Object.entries(subjectMap).map(([sub, pcts]) => {
-                const avg =
-                  Math.round(
-                    (pcts.reduce((a, b) => a + b, 0) / pcts.length) * 10,
-                  ) / 10;
-                return (
-                  <div
-                    key={sub}
-                    className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg"
-                  >
-                    <div className="flex items-center justify-between flex-wrap gap-2">
-                      <div>
-                        <p className="text-gray-900 font-medium">{sub}</p>
-                        <p className="text-gray-500 text-xs">
-                          {pcts.length} exam(s)
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-gray-900 font-semibold text-lg">
-                          {avg}%
-                        </p>
-                        <p className="text-gray-500 text-xs">Average</p>
-                      </div>
-                    </div>
-                    {/* Progress bar */}
-                    <div className="mt-3 h-2 bg-white rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-blue-500 rounded-full transition-all"
-                        style={{ width: `${avg}%` }}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* ── Attendance Report ── */}
-      {activeTab === "attendance" && (
-        <div className="bg-white rounded-xl shadow-sm p-6">
-          <h2 className="text-gray-900 font-medium mb-5">Attendance Summary</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5">
-            <div className="p-5 bg-green-50 rounded-lg text-center">
-              <p className="text-2xl font-bold text-green-700">{present}</p>
-              <p className="text-sm text-gray-600">Days Present</p>
-            </div>
-            <div className="p-5 bg-red-50 rounded-lg text-center">
-              <p className="text-2xl font-bold text-red-700">{absent}</p>
-              <p className="text-sm text-gray-600">Days Absent</p>
-            </div>
-            <div className="p-5 bg-blue-50 rounded-lg text-center">
-              <p className="text-2xl font-bold text-blue-700">{attPct}%</p>
-              <p className="text-sm text-gray-600">Attendance Rate</p>
-            </div>
+      {/* SUMMARY */}
+      {portfolio && (
+        <div className="space-y-3">
+          <div className="bg-white p-4 rounded">
+            <h3>Attendance</h3>
+            <p>{portfolio.attendanceSummary}</p>
           </div>
-          {/* Progress ring-style bar */}
-          <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
-            <div
-              className={`h-full rounded-full transition-all ${attPct >= 75 ? "bg-green-500" : "bg-red-500"}`}
-              style={{ width: `${attPct}%` }}
-            />
-          </div>
-          <p className="text-xs text-gray-500 mt-2">Minimum required: 75%</p>
-          {attPct < 75 && (
-            <div className="mt-4 p-3 bg-yellow-50 border-l-4 border-yellow-400 rounded text-yellow-800 text-sm">
-              Your attendance is below the required 75%. Please improve to
-              remain eligible for exams.
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* ── Achievements ── */}
-      {activeTab === "achievements" && (
-        <div className="bg-white rounded-xl shadow-sm p-6">
-          <h2 className="text-gray-900 font-medium mb-5">
-            Achievements & Certificates
-          </h2>
-          {ach.length === 0 ? (
-            <p className="text-gray-400 text-sm">
-              No achievements recorded yet.
-            </p>
-          ) : (
-            <div className="space-y-3">
-              {ach.map((a) => (
-                <div
-                  key={a.achievementId}
-                  className="flex items-start justify-between p-4 border border-gray-200 rounded-lg hover:border-blue-300 transition-colors"
-                >
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center shrink-0">
-                      <Award className="w-5 h-5 text-blue-600" />
-                    </div>
-                    <div>
-                      <p className="text-gray-900 font-medium text-sm">
-                        {a.title}
-                      </p>
-                      <p className="text-gray-500 text-xs">
-                        {new Date(a.date).toLocaleDateString()}
-                      </p>
-                    </div>
-                  </div>
-                  <span className="px-2.5 py-1 bg-purple-100 text-purple-700 rounded-full text-xs shrink-0">
-                    {a.category}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* ── Full Portfolio ── */}
-      {activeTab === "portfolio" && (
-        <div className="space-y-4">
-          {!portfolio ? (
-            <div className="bg-yellow-50 border-l-4 border-yellow-400 rounded-xl p-5 text-yellow-800 text-sm">
-              Portfolio has not been compiled yet. Please ask your teacher or
-              admin to compile it.
-            </div>
-          ) : (
-            <>
-              {[
-                {
-                  label: "Attendance Summary",
-                  value: portfolio.attendanceSummary,
-                },
-                { label: "Marks Summary", value: portfolio.marksSummary },
-                {
-                  label: "Achievements Summary",
-                  value: portfolio.achievementsSummary,
-                },
-                { label: "Behavior Summary", value: portfolio.behaviorSummary },
-              ].map((s) => (
-                <div
-                  key={s.label}
-                  className="bg-white rounded-xl shadow-sm p-5"
-                >
-                  <h3 className="text-gray-700 font-medium text-sm mb-3">
-                    {s.label}
-                  </h3>
-                  <pre className="text-gray-600 text-sm whitespace-pre-wrap font-sans">
-                    {s.value || "No data available."}
-                  </pre>
-                </div>
-              ))}
-              <p className="text-xs text-gray-400 text-right">
-                Last updated: {new Date(portfolio.lastUpdated).toLocaleString()}
-              </p>
-            </>
-          )}
         </div>
       )}
     </div>
   );
 }
+
+// ================= UI COMPONENTS =================
+function Card({
+  title,
+  value,
+  icon,
+  color,
+}: {
+  title: string;
+  value: any;
+  icon: React.ReactNode;
+  color: string;
+}) {
+  return (
+    <div className="bg-white rounded-xl shadow-sm p-4 flex items-center gap-4 hover:shadow-md transition">
+      {/* ICON BOX */}
+      <div
+        className={`w-10 h-10 flex items-center justify-center rounded-lg text-white ${color}`}
+      >
+        {icon}
+      </div>
+
+      {/* TEXT */}
+      <div>
+        <p className="text-gray-500 text-xs">{title}</p>
+        <p className="text-lg font-semibold text-gray-900">{value}</p>
+      </div>
+    </div>
+  );
+}
+
 // import React, { useState } from "react";
 // import {
 //   Award,

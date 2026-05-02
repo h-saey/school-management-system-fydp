@@ -80,9 +80,24 @@ namespace SMS_Backend.Controllers
 
             await _context.SaveChangesAsync();
 
+            // 🔥 GUARANTEE non-null strings (important for frontend)
+            portfolio.AttendanceSummary ??= "No attendance data available.";
+            portfolio.MarksSummary ??= "No marks data available.";
+            portfolio.AchievementsSummary ??= "No achievements available.";
+            portfolio.BehaviorSummary ??= "No behavior remarks available.";
 
-
-            return Ok(portfolio);
+            //return Ok(portfolio);
+            return Ok(new
+            {
+                portfolio.PortfolioId,
+                portfolio.StudentId,
+                portfolio.AttendanceSummary,
+                portfolio.MarksSummary,
+                portfolio.AchievementsSummary,
+                portfolio.BehaviorSummary,
+                portfolio.GeneratedOn,
+                portfolio.LastUpdated
+            });
         }
         private async Task<StudentPortfolio> GeneratePortfolio(int studentId, StudentPortfolio? existing = null)
         {

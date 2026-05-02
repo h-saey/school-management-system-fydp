@@ -135,7 +135,7 @@
  * Base typography. This is not applied to elements which have an ancestor with a Tailwind text class.
  */
 @layer base {
-  :where(:not(:has([class*=' text-']), :not(:has([class^='text-'])))) {
+  :where(:not(:has([class*=" text-"]), :not(:has([class^="text-"])))) {
     h1 {
       font-size: var(--text-2xl);
       font-weight: var(--font-weight-medium);
@@ -182,4 +182,30 @@
 
 html {
   font-size: var(--font-size);
+}
+
+/* ================= PDF SAFE MODE ================= */
+.pdf-mode,
+.pdf-mode * {
+  color: #000000 !important;
+  background: #ffffff !important;
+  border-color: #d1d5db !important;
+  box-shadow: none !important;
+  filter: none !important;
+
+  /* 🔥 CRITICAL: kill OKLCH / modern color parsing */
+  color-scheme: light !important;
+}
+
+/* remove ALL Tailwind gradients */
+.pdf-mode .bg-gradient-to-r,
+.pdf-mode .bg-gradient-to-l,
+.pdf-mode .bg-gradient-to-b,
+.pdf-mode .bg-gradient-to-t {
+  background: #f3f4f6 !important;
+}
+
+/* kill modern color functions indirectly */
+.pdf-mode * {
+  background-image: none !important;
 }

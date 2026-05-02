@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   DollarSign,
   Download,
@@ -6,79 +6,63 @@ import {
   Clock,
   AlertCircle,
 } from "lucide-react";
+import {
+  getLinkedStudent,
+  getStudentFees,
+  type FeeRecord,
+} from "../../services/parentApi";
 
 export function FeeStatus() {
-  const feeRecords = [
-    {
-      month: "August 2025",
-      amount: 5000,
-      status: "Paid",
-      paidDate: "2025-08-05",
-      receiptNo: "RCP001",
-    },
-    {
-      month: "September 2025",
-      amount: 5000,
-      status: "Paid",
-      paidDate: "2025-09-03",
-      receiptNo: "RCP002",
-    },
-    {
-      month: "October 2025",
-      amount: 5000,
-      status: "Paid",
-      paidDate: "2025-10-07",
-      receiptNo: "RCP003",
-    },
-    {
-      month: "November 2025",
-      amount: 5000,
-      status: "Paid",
-      paidDate: "2025-11-04",
-      receiptNo: "RCP004",
-    },
-    {
-      month: "December 2025",
-      amount: 5000,
-      status: "Paid",
-      paidDate: "2025-12-02",
-      receiptNo: "RCP005",
-    },
-    {
-      month: "January 2026",
-      amount: 5000,
-      status: "Pending",
-      dueDate: "2025-12-20",
-    },
-    {
-      month: "February 2026",
-      amount: 5000,
-      status: "Upcoming",
-      dueDate: "2026-01-20",
-    },
-    {
-      month: "March 2026",
-      amount: 5000,
-      status: "Upcoming",
-      dueDate: "2026-02-20",
-    },
-  ];
+  const [feeRecords, setFeeRecords] = useState<FeeRecord[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function load() {
+      try {
+        const student = await getLinkedStudent();
+        const fees = await getStudentFees(student.studentId);
+        setFeeRecords(fees);
+      } catch (e: any) {
+        setError(e.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+    load();
+  }, []);
+
+  if (loading)
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-gray-500">Loading fees…</div>
+      </div>
+    );
+
+  if (error)
+    return (
+      <div className="p-6 bg-red-50 rounded-xl border border-red-200 text-red-700 flex items-center gap-2">
+        <AlertCircle className="w-5 h-5 shrink-0" />
+        {error}
+      </div>
+    );
 
   const totalPaid = feeRecords
     .filter((f) => f.status === "Paid")
-    .reduce((sum, f) => sum + f.amount, 0);
+    .reduce((s, f) => s + f.paidAmount, 0);
   const totalPending = feeRecords
-    .filter((f) => f.status === "Pending")
-    .reduce((sum, f) => sum + f.amount, 0);
+    .filter((f) => f.status === "Unpaid" || f.status === "Overdue")
+    .reduce((s, f) => s + (f.totalAmount - f.paidAmount), 0);
   const totalUpcoming = feeRecords
-    .filter((f) => f.status === "Upcoming")
-    .reduce((sum, f) => sum + f.amount, 0);
+    .filter((f) => f.status === "Partial")
+    .reduce((s, f) => s + (f.totalAmount - f.paidAmount), 0);
 
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "Paid":
         return <CheckCircle className="w-5 h-5 text-green-600" />;
-      case "Pending":
+      case "Unpaid":
+      case "Overdue":
         return <AlertCircle className="w-5 h-5 text-red-600" />;
       default:
         return <Clock className="w-5 h-5 text-gray-600" />;
@@ -89,12 +73,17 @@ export function FeeStatus() {
     switch (status) {
       case "Paid":
         return "bg-green-100 text-green-700";
-      case "Pending":
+      case "Unpaid":
+      case "Overdue":
         return "bg-red-100 text-red-700";
       default:
         return "bg-gray-100 text-gray-700";
     }
   };
+
+  const pendingRecord = feeRecords.find(
+    (f) => f.status === "Unpaid" || f.status === "Overdue",
+  );
 
   return (
     <div className="space-y-6">
@@ -113,7 +102,10 @@ export function FeeStatus() {
             <h3 className="text-gray-900">Total Paid</h3>
           </div>
           <p className="text-gray-900">₹{totalPaid.toLocaleString()}</p>
-          <p className="text-sm text-green-600">5 months cleared</p>
+          <p className="text-sm text-green-600">
+            {feeRecords.filter((f) => f.status === "Paid").length} term(s)
+            cleared
+          </p>
         </div>
 
         <div className="bg-white rounded-xl shadow-sm p-6">
@@ -122,7 +114,11 @@ export function FeeStatus() {
             <h3 className="text-gray-900">Pending Payment</h3>
           </div>
           <p className="text-gray-900">₹{totalPending.toLocaleString()}</p>
-          <p className="text-sm text-red-600">Due by Dec 20, 2025</p>
+          <p className="text-sm text-red-600">
+            {pendingRecord
+              ? `Due by ${new Date(pendingRecord.dueDate).toLocaleDateString()}`
+              : "No pending dues"}
+          </p>
         </div>
 
         <div className="bg-white rounded-xl shadow-sm p-6">
@@ -131,7 +127,10 @@ export function FeeStatus() {
             <h3 className="text-gray-900">Upcoming Fees</h3>
           </div>
           <p className="text-gray-900">₹{totalUpcoming.toLocaleString()}</p>
-          <p className="text-sm text-gray-600">3 months scheduled</p>
+          <p className="text-sm text-gray-600">
+            {feeRecords.filter((f) => f.status === "Partial").length} term(s)
+            partial
+          </p>
         </div>
       </div>
 
@@ -143,9 +142,12 @@ export function FeeStatus() {
             <div className="flex-1">
               <h3 className="text-gray-900 mb-2">Payment Reminder</h3>
               <p className="text-gray-700 mb-4">
-                Fee payment of ₹{totalPending.toLocaleString()} is pending for
-                January 2026. Please clear the dues by December 20, 2025 to
-                avoid late fees.
+                Fee payment of ₹{totalPending.toLocaleString()} is pending.
+                Please clear the dues
+                {pendingRecord
+                  ? ` by ${new Date(pendingRecord.dueDate).toLocaleDateString()}`
+                  : ""}{" "}
+                to avoid late fees.
               </p>
               <button className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
                 Pay Now
@@ -164,128 +166,77 @@ export function FeeStatus() {
           </div>
         </div>
 
-        {/* <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-4 text-left text-gray-700">Period</th>
-                <th className="px-6 py-4 text-left text-gray-700">Amount</th>
-                <th className="px-6 py-4 text-left text-gray-700">Status</th>
-                <th className="px-6 py-4 text-left text-gray-700">Date</th>
-                <th className="px-6 py-4 text-left text-gray-700">Receipt/Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {feeRecords.map((record, index) => (
-                <tr key={index} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 text-gray-900">{record.month}</td>
-                  <td className="px-6 py-4 text-gray-700">₹{record.amount.toLocaleString()}</td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-2">
-                      {getStatusIcon(record.status)}
-                      <span className={`px-3 py-1 rounded-full text-sm ${getStatusColor(record.status)}`}>
-                        {record.status}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-gray-700">
-                    {record.status === 'Paid' ? record.paidDate : 
-                     record.status === 'Pending' ? `Due: ${record.dueDate}` : 
-                     `Due: ${record.dueDate}`}
-                  </td>
-                  <td className="px-6 py-4">
-                    {record.status === 'Paid' ? (
-                      <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                        <Download className="w-4 h-4" />
-                        Download Receipt
-                      </button>
-                    ) : record.status === 'Pending' ? (
-                      <button className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
-                        Pay Now
-                      </button>
-                    ) : (
-                      <span className="text-sm text-gray-500">Not due yet</span>
-                    )}
-                  </td>
+        {feeRecords.length === 0 ? (
+          <div className="p-10 text-center text-gray-400 text-sm">
+            No fee records found.
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[600px] sm:min-w-full border-collapse">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-4 py-3 text-left text-gray-700 text-xs sm:text-sm">
+                    Period
+                  </th>
+                  <th className="px-4 py-3 text-left text-gray-700 text-xs sm:text-sm">
+                    Amount
+                  </th>
+                  <th className="px-4 py-3 text-left text-gray-700 text-xs sm:text-sm">
+                    Status
+                  </th>
+                  <th className="px-4 py-3 text-left text-gray-700 text-xs sm:text-sm">
+                    Date
+                  </th>
+                  <th className="px-4 py-3 text-left text-gray-700 text-xs sm:text-sm">
+                    Receipt / Action
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div> */}
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[600px] sm:min-w-full border-collapse">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-4 py-3 text-left text-gray-700 text-xs sm:text-sm">
-                  Period
-                </th>
-                <th className="px-4 py-3 text-left text-gray-700 text-xs sm:text-sm">
-                  Amount
-                </th>
-                <th className="px-4 py-3 text-left text-gray-700 text-xs sm:text-sm">
-                  Status
-                </th>
-                <th className="px-4 py-3 text-left text-gray-700 text-xs sm:text-sm">
-                  Date
-                </th>
-                <th className="px-4 py-3 text-left text-gray-700 text-xs sm:text-sm">
-                  Receipt / Action
-                </th>
-              </tr>
-            </thead>
-
-            <tbody className="divide-y divide-gray-200">
-              {feeRecords.map((record, index) => (
-                <tr key={index} className="hover:bg-gray-50">
-                  {/* Period */}
-                  <td className="px-4 py-3 text-gray-900 text-xs sm:text-sm">
-                    {record.month}
-                  </td>
-
-                  {/* Amount */}
-                  <td className="px-4 py-3 text-gray-700 text-xs sm:text-sm">
-                    ₹{record.amount.toLocaleString()}
-                  </td>
-
-                  {/* Status */}
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
-                      {getStatusIcon(record.status)}
-                      <span
-                        className={`px-2 py-1 rounded-full ${getStatusColor(record.status)}`}
-                      >
-                        {record.status}
-                      </span>
-                    </div>
-                  </td>
-
-                  {/* Date */}
-                  <td className="px-4 py-3 text-gray-700 text-xs sm:text-sm">
-                    {record.status === "Paid"
-                      ? record.paidDate
-                      : `Due: ${record.dueDate}`}
-                  </td>
-
-                  {/* Action */}
-                  <td className="px-4 py-3 text-xs sm:text-sm">
-                    {record.status === "Paid" ? (
-                      <button className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-xs sm:text-sm">
-                        <Download className="w-4 h-4 sm:w-5 sm:h-5" />
-                        Download
-                      </button>
-                    ) : record.status === "Pending" ? (
-                      <button className="px-3 py-2 sm:px-4 sm:py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-xs sm:text-sm">
-                        Pay Now
-                      </button>
-                    ) : (
-                      <span className="text-gray-500">Not due yet</span>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {feeRecords.map((record) => (
+                  <tr key={record.feeId} className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-gray-900 text-xs sm:text-sm">
+                      {record.term}
+                    </td>
+                    <td className="px-4 py-3 text-gray-700 text-xs sm:text-sm">
+                      ₹{record.totalAmount.toLocaleString()}
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+                        {getStatusIcon(record.status)}
+                        <span
+                          className={`px-2 py-1 rounded-full ${getStatusColor(record.status)}`}
+                        >
+                          {record.status}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 text-gray-700 text-xs sm:text-sm">
+                      {record.status === "Paid"
+                        ? new Date(record.dueDate).toLocaleDateString()
+                        : `Due: ${new Date(record.dueDate).toLocaleDateString()}`}
+                    </td>
+                    <td className="px-4 py-3 text-xs sm:text-sm">
+                      {record.status === "Paid" ? (
+                        <button className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-xs sm:text-sm">
+                          <Download className="w-4 h-4 sm:w-5 sm:h-5" />
+                          Download
+                        </button>
+                      ) : record.status === "Unpaid" ||
+                        record.status === "Overdue" ? (
+                        <button className="px-3 py-2 sm:px-4 sm:py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-xs sm:text-sm">
+                          Pay Now
+                        </button>
+                      ) : (
+                        <span className="text-gray-500">Partial</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       {/* Payment Instructions */}
@@ -293,7 +244,6 @@ export function FeeStatus() {
         <h2 className="text-gray-900 text-lg sm:text-xl mb-4">
           Payment Instructions
         </h2>
-
         <div className="space-y-3 text-gray-700 text-sm sm:text-base">
           <p>
             • Fees can be paid online through the school portal or offline at
@@ -304,19 +254,328 @@ export function FeeStatus() {
           <p>• For any fee-related queries, contact the accounts department.</p>
         </div>
       </div>
-
-      {/* <div className="bg-white rounded-xl shadow-sm p-6">
-        <h2 className="text-gray-900 mb-4">Payment Instructions</h2>
-        <div className="space-y-3 text-gray-700">
-          <p>
-            • Fees can be paid online through the school portal or offline at
-            the school office.
-          </p>
-          <p>• Late fee of ₹500 will be charged after the due date.</p>
-          <p>• Download receipt immediately after payment for your records.</p>
-          <p>• For any fee-related queries, contact the accounts department.</p>
-        </div>
-      </div> */}
     </div>
   );
 }
+// import React from "react";
+// import {
+//   DollarSign,
+//   Download,
+//   CheckCircle,
+//   Clock,
+//   AlertCircle,
+// } from "lucide-react";
+
+// export function FeeStatus() {
+//   const feeRecords = [
+//     {
+//       month: "August 2025",
+//       amount: 5000,
+//       status: "Paid",
+//       paidDate: "2025-08-05",
+//       receiptNo: "RCP001",
+//     },
+//     {
+//       month: "September 2025",
+//       amount: 5000,
+//       status: "Paid",
+//       paidDate: "2025-09-03",
+//       receiptNo: "RCP002",
+//     },
+//     {
+//       month: "October 2025",
+//       amount: 5000,
+//       status: "Paid",
+//       paidDate: "2025-10-07",
+//       receiptNo: "RCP003",
+//     },
+//     {
+//       month: "November 2025",
+//       amount: 5000,
+//       status: "Paid",
+//       paidDate: "2025-11-04",
+//       receiptNo: "RCP004",
+//     },
+//     {
+//       month: "December 2025",
+//       amount: 5000,
+//       status: "Paid",
+//       paidDate: "2025-12-02",
+//       receiptNo: "RCP005",
+//     },
+//     {
+//       month: "January 2026",
+//       amount: 5000,
+//       status: "Pending",
+//       dueDate: "2025-12-20",
+//     },
+//     {
+//       month: "February 2026",
+//       amount: 5000,
+//       status: "Upcoming",
+//       dueDate: "2026-01-20",
+//     },
+//     {
+//       month: "March 2026",
+//       amount: 5000,
+//       status: "Upcoming",
+//       dueDate: "2026-02-20",
+//     },
+//   ];
+
+//   const totalPaid = feeRecords
+//     .filter((f) => f.status === "Paid")
+//     .reduce((sum, f) => sum + f.amount, 0);
+//   const totalPending = feeRecords
+//     .filter((f) => f.status === "Pending")
+//     .reduce((sum, f) => sum + f.amount, 0);
+//   const totalUpcoming = feeRecords
+//     .filter((f) => f.status === "Upcoming")
+//     .reduce((sum, f) => sum + f.amount, 0);
+
+//   const getStatusIcon = (status: string) => {
+//     switch (status) {
+//       case "Paid":
+//         return <CheckCircle className="w-5 h-5 text-green-600" />;
+//       case "Pending":
+//         return <AlertCircle className="w-5 h-5 text-red-600" />;
+//       default:
+//         return <Clock className="w-5 h-5 text-gray-600" />;
+//     }
+//   };
+
+//   const getStatusColor = (status: string) => {
+//     switch (status) {
+//       case "Paid":
+//         return "bg-green-100 text-green-700";
+//       case "Pending":
+//         return "bg-red-100 text-red-700";
+//       default:
+//         return "bg-gray-100 text-gray-700";
+//     }
+//   };
+
+//   return (
+//     <div className="space-y-6">
+//       <div>
+//         <h1 className="text-gray-900 mb-2">Fee Status</h1>
+//         <p className="text-gray-600">
+//           Track fee payments and download receipts
+//         </p>
+//       </div>
+
+//       {/* Summary Cards */}
+//       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+//         <div className="bg-white rounded-xl shadow-sm p-6">
+//           <div className="flex items-center gap-3 mb-2">
+//             <CheckCircle className="w-6 h-6 text-green-600" />
+//             <h3 className="text-gray-900">Total Paid</h3>
+//           </div>
+//           <p className="text-gray-900">₹{totalPaid.toLocaleString()}</p>
+//           <p className="text-sm text-green-600">5 months cleared</p>
+//         </div>
+
+//         <div className="bg-white rounded-xl shadow-sm p-6">
+//           <div className="flex items-center gap-3 mb-2">
+//             <AlertCircle className="w-6 h-6 text-red-600" />
+//             <h3 className="text-gray-900">Pending Payment</h3>
+//           </div>
+//           <p className="text-gray-900">₹{totalPending.toLocaleString()}</p>
+//           <p className="text-sm text-red-600">Due by Dec 20, 2025</p>
+//         </div>
+
+//         <div className="bg-white rounded-xl shadow-sm p-6">
+//           <div className="flex items-center gap-3 mb-2">
+//             <Clock className="w-6 h-6 text-gray-600" />
+//             <h3 className="text-gray-900">Upcoming Fees</h3>
+//           </div>
+//           <p className="text-gray-900">₹{totalUpcoming.toLocaleString()}</p>
+//           <p className="text-sm text-gray-600">3 months scheduled</p>
+//         </div>
+//       </div>
+
+//       {/* Pending Payment Alert */}
+//       {totalPending > 0 && (
+//         <div className="bg-red-50 border-l-4 border-red-500 p-6 rounded-lg">
+//           <div className="flex items-start gap-4">
+//             <AlertCircle className="w-6 h-6 text-red-600 mt-1" />
+//             <div className="flex-1">
+//               <h3 className="text-gray-900 mb-2">Payment Reminder</h3>
+//               <p className="text-gray-700 mb-4">
+//                 Fee payment of ₹{totalPending.toLocaleString()} is pending for
+//                 January 2026. Please clear the dues by December 20, 2025 to
+//                 avoid late fees.
+//               </p>
+//               <button className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+//                 Pay Now
+//               </button>
+//             </div>
+//           </div>
+//         </div>
+//       )}
+
+//       {/* Fee Records Table */}
+//       <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+//         <div className="p-6 border-b">
+//           <div className="flex items-center gap-3">
+//             <DollarSign className="w-6 h-6 text-green-600" />
+//             <h2 className="text-gray-900">Fee Payment History</h2>
+//           </div>
+//         </div>
+
+//         {/* <div className="overflow-x-auto">
+//           <table className="w-full">
+//             <thead className="bg-gray-50">
+//               <tr>
+//                 <th className="px-6 py-4 text-left text-gray-700">Period</th>
+//                 <th className="px-6 py-4 text-left text-gray-700">Amount</th>
+//                 <th className="px-6 py-4 text-left text-gray-700">Status</th>
+//                 <th className="px-6 py-4 text-left text-gray-700">Date</th>
+//                 <th className="px-6 py-4 text-left text-gray-700">Receipt/Action</th>
+//               </tr>
+//             </thead>
+//             <tbody className="divide-y divide-gray-200">
+//               {feeRecords.map((record, index) => (
+//                 <tr key={index} className="hover:bg-gray-50">
+//                   <td className="px-6 py-4 text-gray-900">{record.month}</td>
+//                   <td className="px-6 py-4 text-gray-700">₹{record.amount.toLocaleString()}</td>
+//                   <td className="px-6 py-4">
+//                     <div className="flex items-center gap-2">
+//                       {getStatusIcon(record.status)}
+//                       <span className={`px-3 py-1 rounded-full text-sm ${getStatusColor(record.status)}`}>
+//                         {record.status}
+//                       </span>
+//                     </div>
+//                   </td>
+//                   <td className="px-6 py-4 text-gray-700">
+//                     {record.status === 'Paid' ? record.paidDate :
+//                      record.status === 'Pending' ? `Due: ${record.dueDate}` :
+//                      `Due: ${record.dueDate}`}
+//                   </td>
+//                   <td className="px-6 py-4">
+//                     {record.status === 'Paid' ? (
+//                       <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+//                         <Download className="w-4 h-4" />
+//                         Download Receipt
+//                       </button>
+//                     ) : record.status === 'Pending' ? (
+//                       <button className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+//                         Pay Now
+//                       </button>
+//                     ) : (
+//                       <span className="text-sm text-gray-500">Not due yet</span>
+//                     )}
+//                   </td>
+//                 </tr>
+//               ))}
+//             </tbody>
+//           </table>
+//         </div> */}
+//         <div className="overflow-x-auto">
+//           <table className="w-full min-w-[600px] sm:min-w-full border-collapse">
+//             <thead className="bg-gray-50">
+//               <tr>
+//                 <th className="px-4 py-3 text-left text-gray-700 text-xs sm:text-sm">
+//                   Period
+//                 </th>
+//                 <th className="px-4 py-3 text-left text-gray-700 text-xs sm:text-sm">
+//                   Amount
+//                 </th>
+//                 <th className="px-4 py-3 text-left text-gray-700 text-xs sm:text-sm">
+//                   Status
+//                 </th>
+//                 <th className="px-4 py-3 text-left text-gray-700 text-xs sm:text-sm">
+//                   Date
+//                 </th>
+//                 <th className="px-4 py-3 text-left text-gray-700 text-xs sm:text-sm">
+//                   Receipt / Action
+//                 </th>
+//               </tr>
+//             </thead>
+
+//             <tbody className="divide-y divide-gray-200">
+//               {feeRecords.map((record, index) => (
+//                 <tr key={index} className="hover:bg-gray-50">
+//                   {/* Period */}
+//                   <td className="px-4 py-3 text-gray-900 text-xs sm:text-sm">
+//                     {record.month}
+//                   </td>
+
+//                   {/* Amount */}
+//                   <td className="px-4 py-3 text-gray-700 text-xs sm:text-sm">
+//                     ₹{record.amount.toLocaleString()}
+//                   </td>
+
+//                   {/* Status */}
+//                   <td className="px-4 py-3">
+//                     <div className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+//                       {getStatusIcon(record.status)}
+//                       <span
+//                         className={`px-2 py-1 rounded-full ${getStatusColor(record.status)}`}
+//                       >
+//                         {record.status}
+//                       </span>
+//                     </div>
+//                   </td>
+
+//                   {/* Date */}
+//                   <td className="px-4 py-3 text-gray-700 text-xs sm:text-sm">
+//                     {record.status === "Paid"
+//                       ? record.paidDate
+//                       : `Due: ${record.dueDate}`}
+//                   </td>
+
+//                   {/* Action */}
+//                   <td className="px-4 py-3 text-xs sm:text-sm">
+//                     {record.status === "Paid" ? (
+//                       <button className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-xs sm:text-sm">
+//                         <Download className="w-4 h-4 sm:w-5 sm:h-5" />
+//                         Download
+//                       </button>
+//                     ) : record.status === "Pending" ? (
+//                       <button className="px-3 py-2 sm:px-4 sm:py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-xs sm:text-sm">
+//                         Pay Now
+//                       </button>
+//                     ) : (
+//                       <span className="text-gray-500">Not due yet</span>
+//                     )}
+//                   </td>
+//                 </tr>
+//               ))}
+//             </tbody>
+//           </table>
+//         </div>
+//       </div>
+
+//       {/* Payment Instructions */}
+//       <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6">
+//         <h2 className="text-gray-900 text-lg sm:text-xl mb-4">
+//           Payment Instructions
+//         </h2>
+
+//         <div className="space-y-3 text-gray-700 text-sm sm:text-base">
+//           <p>
+//             • Fees can be paid online through the school portal or offline at
+//             the school office.
+//           </p>
+//           <p>• Late fee of ₹500 will be charged after the due date.</p>
+//           <p>• Download receipt immediately after payment for your records.</p>
+//           <p>• For any fee-related queries, contact the accounts department.</p>
+//         </div>
+//       </div>
+
+//       {/* <div className="bg-white rounded-xl shadow-sm p-6">
+//         <h2 className="text-gray-900 mb-4">Payment Instructions</h2>
+//         <div className="space-y-3 text-gray-700">
+//           <p>
+//             • Fees can be paid online through the school portal or offline at
+//             the school office.
+//           </p>
+//           <p>• Late fee of ₹500 will be charged after the due date.</p>
+//           <p>• Download receipt immediately after payment for your records.</p>
+//           <p>• For any fee-related queries, contact the accounts department.</p>
+//         </div>
+//       </div> */}
+//     </div>
+//   );
+// }
