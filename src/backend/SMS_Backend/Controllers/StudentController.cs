@@ -128,6 +128,13 @@ namespace SMS_Backend.Controllers
             if (!userExists)
                 return BadRequest(new { message = "Linked user not found." });
 
+            if (await _context.Students.AnyAsync(s => s.UserId == dto.UserId))
+            {
+                return BadRequest(new
+                {
+                    message = "This user already has a student profile."
+                });
+            }
             var duplicate = await _context.Students
                 .AnyAsync(s => s.RollNumber == dto.RollNumber);
             if (duplicate)

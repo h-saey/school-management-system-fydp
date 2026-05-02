@@ -86,7 +86,7 @@ export function AdminDashboard({ user, onLogout }: AdminDashboardProps) {
       </ResponsiveDashboard>
 
       {/* AI Widget — floats over all pages */}
-      <AIWidget />
+      {/*<AIWidget />*/}
     </>
   );
 }

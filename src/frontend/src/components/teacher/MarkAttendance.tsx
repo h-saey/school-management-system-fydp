@@ -397,8 +397,10 @@ export function MarkAttendance() {
                               : "bg-yellow-100 text-yellow-700"
                         }`}
                       >
-                        {student.status.charAt(0).toUpperCase() +
-                          student.status.slice(1)}
+                        {/* {student.status.charAt(0).toUpperCase() +
+                          student.status.slice(1)} */}
+                        {(student.status ?? "present").charAt(0).toUpperCase() +
+                          (student.status ?? "present").slice(1)}
                       </span>
                       {student.existingAttendanceId && (
                         <span className="ml-2 text-xs text-gray-400">

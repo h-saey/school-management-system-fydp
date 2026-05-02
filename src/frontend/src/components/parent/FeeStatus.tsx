@@ -34,16 +34,18 @@ export function FeeStatus() {
 
   if (loading)
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500">Loading fees…</div>
+      <div className="flex h-64 items-center justify-center px-4">
+        <div className="text-center text-sm text-gray-500 sm:text-base">
+          Loading fees…
+        </div>
       </div>
     );
 
   if (error)
     return (
-      <div className="p-6 bg-red-50 rounded-xl border border-red-200 text-red-700 flex items-center gap-2">
+      <div className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 sm:p-6 sm:text-base">
         <AlertCircle className="w-5 h-5 shrink-0" />
-        {error}
+        <span>{error}</span>
       </div>
     );
 
@@ -89,14 +91,14 @@ export function FeeStatus() {
     <div className="space-y-6">
       <div>
         <h1 className="text-gray-900 mb-2">Fee Status</h1>
-        <p className="text-gray-600">
+        <p className="text-sm text-gray-600 sm:text-base">
           Track fee payments and download receipts
         </p>
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white rounded-xl shadow-sm p-6">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-6">
+        <div className="rounded-xl bg-white p-4 shadow-sm sm:p-6">
           <div className="flex items-center gap-3 mb-2">
             <CheckCircle className="w-6 h-6 text-green-600" />
             <h3 className="text-gray-900">Total Paid</h3>
@@ -108,7 +110,7 @@ export function FeeStatus() {
           </p>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm p-6">
+        <div className="rounded-xl bg-white p-4 shadow-sm sm:p-6">
           <div className="flex items-center gap-3 mb-2">
             <AlertCircle className="w-6 h-6 text-red-600" />
             <h3 className="text-gray-900">Pending Payment</h3>
@@ -121,7 +123,7 @@ export function FeeStatus() {
           </p>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm p-6">
+        <div className="rounded-xl bg-white p-4 shadow-sm sm:p-6">
           <div className="flex items-center gap-3 mb-2">
             <Clock className="w-6 h-6 text-gray-600" />
             <h3 className="text-gray-900">Upcoming Fees</h3>
@@ -136,8 +138,8 @@ export function FeeStatus() {
 
       {/* Pending Payment Alert */}
       {totalPending > 0 && (
-        <div className="bg-red-50 border-l-4 border-red-500 p-6 rounded-lg">
-          <div className="flex items-start gap-4">
+        <div className="rounded-lg border-l-4 border-red-500 bg-red-50 p-4 sm:p-6">
+          <div className="flex items-start gap-3 sm:gap-4">
             <AlertCircle className="w-6 h-6 text-red-600 mt-1" />
             <div className="flex-1">
               <h3 className="text-gray-900 mb-2">Payment Reminder</h3>
@@ -149,7 +151,7 @@ export function FeeStatus() {
                   : ""}{" "}
                 to avoid late fees.
               </p>
-              <button className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+              <button className="inline-flex min-h-11 items-center justify-center rounded-lg bg-red-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-red-700">
                 Pay Now
               </button>
             </div>
@@ -159,7 +161,7 @@ export function FeeStatus() {
 
       {/* Fee Records Table */}
       <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-        <div className="p-6 border-b">
+        <div className="border-b p-4 sm:p-6">
           <div className="flex items-center gap-3">
             <DollarSign className="w-6 h-6 text-green-600" />
             <h2 className="text-gray-900">Fee Payment History</h2>
@@ -218,13 +220,13 @@ export function FeeStatus() {
                     </td>
                     <td className="px-4 py-3 text-xs sm:text-sm">
                       {record.status === "Paid" ? (
-                        <button className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-xs sm:text-sm">
+                        <button className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-gray-300 px-3 py-2 text-xs transition-colors hover:bg-gray-50 sm:text-sm">
                           <Download className="w-4 h-4 sm:w-5 sm:h-5" />
                           Download
                         </button>
                       ) : record.status === "Unpaid" ||
                         record.status === "Overdue" ? (
-                        <button className="px-3 py-2 sm:px-4 sm:py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-xs sm:text-sm">
+                        <button className="inline-flex min-h-10 items-center justify-center rounded-lg bg-green-600 px-3 py-2 text-xs text-white transition-colors hover:bg-green-700 sm:px-4 sm:text-sm">
                           Pay Now
                         </button>
                       ) : (

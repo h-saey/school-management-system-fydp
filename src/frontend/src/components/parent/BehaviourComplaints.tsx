@@ -41,16 +41,18 @@ export function BehaviourComplaints() {
 
   if (loading)
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500">Loading behaviour data…</div>
+      <div className="flex h-64 items-center justify-center px-4">
+        <div className="text-center text-sm text-gray-500 sm:text-base">
+          Loading behaviour data…
+        </div>
       </div>
     );
 
   if (error)
     return (
-      <div className="p-6 bg-red-50 rounded-xl border border-red-200 text-red-700 flex items-center gap-2">
+      <div className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 sm:p-6 sm:text-base">
         <AlertCircle className="w-5 h-5 shrink-0" />
-        {error}
+        <span>{error}</span>
       </div>
     );
 
@@ -123,14 +125,14 @@ export function BehaviourComplaints() {
     <div className="space-y-6">
       <div>
         <h1 className="text-gray-900 mb-2">Behaviour & Complaints</h1>
-        <p className="text-gray-600">
+        <p className="text-sm text-gray-600 sm:text-base">
           Monitor your child's behaviour feedback and complaint status
         </p>
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white rounded-xl shadow-sm p-6">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-6">
+        <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6">
           <div className="flex items-center gap-3 mb-2">
             <ThumbsUp className="w-6 h-6 text-green-600" />
             <h3 className="text-gray-900">Positive Remarks</h3>
@@ -143,7 +145,7 @@ export function BehaviourComplaints() {
           </p>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm p-6">
+        <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6">
           <div className="flex items-center gap-3 mb-2">
             <MessageSquare className="w-6 h-6 text-blue-600" />
             <h3 className="text-gray-900">Active Complaints</h3>
@@ -154,7 +156,7 @@ export function BehaviourComplaints() {
           </p>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm p-6">
+        <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6">
           <div className="flex items-center gap-3 mb-2">
             <CheckCircle className="w-6 h-6 text-purple-600" />
             <h3 className="text-gray-900">Resolved Issues</h3>
@@ -165,7 +167,7 @@ export function BehaviourComplaints() {
       </div>
 
       {/* Teacher Remarks */}
-      <div className="bg-white rounded-xl shadow-sm p-6">
+      <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6">
         <h2 className="text-gray-900 mb-6">Teacher Remarks & Feedback</h2>
         {behaviourRemarks.length === 0 ? (
           <p className="text-gray-400 text-sm">
@@ -178,14 +180,14 @@ export function BehaviourComplaints() {
               return (
                 <div
                   key={index}
-                  className={`border rounded-lg p-6 ${remark.color}`}
+                  className={`border rounded-lg p-4 sm:p-6 ${remark.color}`}
                 >
-                  <div className="flex items-start gap-4">
+                  <div className="flex items-start gap-3 sm:gap-4">
                     <div className="flex-shrink-0">
                       <Icon className="w-6 h-6 text-gray-700" />
                     </div>
                     <div className="flex-1">
-                      <div className="flex items-start justify-between mb-2">
+                      <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                         <div>
                           <h3 className="text-gray-900 mb-1">
                             {remark.teacher}
@@ -195,7 +197,7 @@ export function BehaviourComplaints() {
                             {remark.type}
                           </span>
                         </div>
-                        <span className="text-sm text-gray-600">
+                        <span className="text-xs text-gray-600 sm:text-sm">
                           {remark.date}
                         </span>
                       </div>
@@ -210,7 +212,7 @@ export function BehaviourComplaints() {
       </div>
 
       {/* Complaints List */}
-      <div className="bg-white rounded-xl shadow-sm p-6">
+      <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6">
         <h2 className="text-gray-900 mb-6 text-lg md:text-xl">
           Child's Complaints Status
         </h2>
@@ -234,17 +236,17 @@ export function BehaviourComplaints() {
                           : complaint.description}
                       </h3>
                     </div>
-                    <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-sm text-gray-600">
+                    <div className="flex flex-wrap items-center gap-2 text-xs text-gray-600 sm:gap-4 sm:text-sm">
                       <span>
                         ID: CMP{String(complaint.complaintId).padStart(3, "0")}
                       </span>
-                      <span>•</span>
+                      <span className="hidden sm:inline">•</span>
                       <span>
                         Submitted by: {complaint.submittedBy.username}
                       </span>
-                      <span>•</span>
+                      <span className="hidden sm:inline">•</span>
                       <span>{complaint.category}</span>
-                      <span>•</span>
+                      <span className="hidden sm:inline">•</span>
                       <span>
                         {new Date(complaint.dateSubmitted).toLocaleDateString()}
                       </span>
@@ -284,9 +286,9 @@ export function BehaviourComplaints() {
       </div>
 
       {/* Guidance Note */}
-      <div className="bg-purple-50 border-l-4 border-purple-500 p-6 rounded-lg">
+      <div className="rounded-lg border-l-4 border-purple-500 bg-purple-50 p-4 sm:p-6">
         <h3 className="text-gray-900 mb-3">Parent Guidance</h3>
-        <div className="space-y-2 text-gray-700 text-sm">
+        <div className="space-y-2 text-sm text-gray-700">
           <p>
             • All teacher remarks are meant to help your child improve and grow.
           </p>

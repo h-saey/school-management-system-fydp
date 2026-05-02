@@ -7,6 +7,7 @@ import { AdminDashboard } from "./components/admin/AdminDashboard";
 import { AppProvider, useApp } from "./contexts/AppContext";
 import { Toaster } from "sonner";
 import { AIWidget } from "./components/ai/AIWidget";
+import type { UserRoleForAI } from "./components/ai/AIPanel";
 
 export type UserRole = "student" | "parent" | "teacher" | "admin";
 
@@ -25,7 +26,7 @@ function AppContent() {
   }
 
   return (
-    // ✅ NO overflow-hidden here — that clips fixed children
+    // ✅ No overflow-hidden here — lets fixed children show
     <div className="min-h-screen bg-gray-50">
       {currentUser.role === "student" && (
         <StudentDashboard user={currentUser} onLogout={logout} />
@@ -40,9 +41,9 @@ function AppContent() {
         <AdminDashboard user={currentUser} onLogout={logout} />
       )}
 
-      {/* ✅ AIWidget placed here — sibling of dashboards, not inside them */}
-      {/* Visible for ALL roles automatically */}
-      <AIWidget userRole={currentUser.role} />
+      {/* ✅ AIWidget here — outside all dashboard wrappers
+          Role passed so panel shows correct view per user */}
+      <AIWidget userRole={currentUser.role as UserRoleForAI} />
     </div>
   );
 }

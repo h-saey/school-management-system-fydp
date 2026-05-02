@@ -347,9 +347,9 @@ export function StudentPortfolio() {
 
         <button
           onClick={handleExportPDF}
-          className="bg-blue-600 text-white px-4 py-2 rounded"
+          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:bg-blue-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 active:scale-[0.99]"
         >
-          <Download className="inline w-4 h-4 mr-1" />
+          <Download className="h-4 w-4" />
           Export PDF
         </button>
       </div>

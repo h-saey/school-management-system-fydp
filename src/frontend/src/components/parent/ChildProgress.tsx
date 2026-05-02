@@ -79,16 +79,18 @@ export function ChildProgress() {
 
   if (loading)
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500">Loading progress…</div>
+      <div className="flex h-64 items-center justify-center px-4">
+        <div className="text-center text-sm text-gray-500 sm:text-base">
+          Loading progress…
+        </div>
       </div>
     );
 
   if (error)
     return (
-      <div className="p-6 bg-red-50 rounded-xl border border-red-200 text-red-700 flex items-center gap-2">
+      <div className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 sm:p-6 sm:text-base">
         <AlertCircle className="w-5 h-5 shrink-0" />
-        {error}
+        <span>{error}</span>
       </div>
     );
 
@@ -160,14 +162,14 @@ export function ChildProgress() {
     <div className="space-y-6">
       <div>
         <h1 className="text-gray-900 mb-2">Child's Academic Progress</h1>
-        <p className="text-gray-600">
+        <p className="text-sm text-gray-600 sm:text-base">
           Detailed performance analysis and teacher feedback
         </p>
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white rounded-xl shadow-sm p-6">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-6">
+        <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6">
           <div className="flex items-center gap-3 mb-2">
             <TrendingUp className="w-6 h-6 text-blue-600" />
             <h3 className="text-gray-900">Overall Performance</h3>
@@ -178,7 +180,7 @@ export function ChildProgress() {
           </p>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm p-6">
+        <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6">
           <div className="flex items-center gap-3 mb-2">
             <Award className="w-6 h-6 text-green-600" />
             <h3 className="text-gray-900">Subjects Passed</h3>
@@ -190,7 +192,7 @@ export function ChildProgress() {
           <p className="text-sm text-green-600">Mid-term results</p>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm p-6">
+        <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6">
           <div className="flex items-center gap-3 mb-2">
             <FileText className="w-6 h-6 text-purple-600" />
             <h3 className="text-gray-900">Subjects Evaluated</h3>
@@ -201,7 +203,7 @@ export function ChildProgress() {
       </div>
 
       {/* Progress Chart */}
-      <div className="bg-white rounded-xl shadow-sm p-6">
+      <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6">
         <h2 className="text-gray-900 mb-6">Performance Trend</h2>
         {progressData.length > 0 ? (
           <ResponsiveContainer width="100%" height={300}>
@@ -228,12 +230,12 @@ export function ChildProgress() {
       </div>
 
       {/* Subject Filter */}
-      <div className="bg-white rounded-xl shadow-sm p-6">
+      <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6">
         <label className="block text-gray-700 mb-2">Filter by Subject</label>
         <select
           value={selectedSubject}
           onChange={(e) => setSelectedSubject(e.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+          className="min-h-11 w-full rounded-lg border border-gray-300 px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-green-500"
         >
           {subjects.map((subject) => (
             <option key={subject}>{subject}</option>
@@ -243,17 +245,17 @@ export function ChildProgress() {
 
       {/* Subject-wise Details */}
       {filteredMarks.length === 0 ? (
-        <div className="bg-white rounded-xl shadow-sm p-8 text-center text-gray-400 text-sm">
+        <div className="bg-white rounded-xl shadow-sm p-6 text-center text-sm text-gray-400 sm:p-8">
           No marks recorded yet.
         </div>
       ) : (
         <div className="space-y-4">
           {filteredMarks.map((mark, index) => (
-            <div key={index} className="bg-white rounded-xl shadow-sm p-6">
-              <div className="flex items-start justify-between mb-4">
+            <div key={index} className="bg-white rounded-xl shadow-sm p-4 sm:p-6">
+              <div className="mb-4 flex items-start justify-between">
                 <div>
                   <h3 className="text-gray-900 mb-2">{mark.subject}</h3>
-                  <div className="flex items-center gap-4 text-sm">
+                  <div className="flex flex-wrap items-center gap-3 text-sm sm:gap-4">
                     <span className="text-gray-600">
                       Marks: {mark.marks}/{mark.total}
                     </span>
@@ -279,7 +281,7 @@ export function ChildProgress() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div className="p-4 bg-blue-50 rounded-lg">
                   <div className="flex items-start gap-2 mb-2">
                     <MessageSquare className="w-4 h-4 text-blue-600 mt-1" />

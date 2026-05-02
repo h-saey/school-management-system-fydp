@@ -5,6 +5,8 @@ import {
   createStudent,
   updateStudent,
   deleteStudent,
+  getUsersByRole,
+  UserRecord,
 } from "../../services/api";
 import { useToast, ToastContainer } from "../../utils/useToast";
 
@@ -29,10 +31,14 @@ const emptyForm = {
   rollNumber: "",
 };
 
+const CLASSES = ["Class 6", "Class 7", "Class 8", "Class 9", "Class 10"];
+const SECTIONS = ["A", "B", "C", "D"];
+
 export function ManageStudents() {
   const { toasts, success, error } = useToast();
 
   const [students, setStudents] = useState<Student[]>([]);
+  const [studentUsers, setStudentUsers] = useState<UserRecord[]>([]);
   const [showAddForm, setShowAddForm] = useState(false);
   const [editStudent, setEditStudent] = useState<Student | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -40,21 +46,25 @@ export function ManageStudents() {
   const [fetching, setFetching] = useState(true);
   const [newStudent, setNewStudent] = useState(emptyForm);
 
-  // ── Fetch ────────────────────────────────────────────────
-  const fetchStudents = async () => {
+  const fetchAll = async () => {
     try {
       setFetching(true);
-      const data = await getStudents();
-      setStudents(data);
+      // Fetch students and available Student-role users in parallel
+      const [studs, users] = await Promise.all([
+        getStudents(),
+        getUsersByRole("Student"),
+      ]);
+      setStudents(studs);
+      setStudentUsers(users);
     } catch (err: any) {
-      error(err.message ?? "Failed to load students");
+      error(err.message ?? "Failed to load data");
     } finally {
       setFetching(false);
     }
   };
 
   useEffect(() => {
-    fetchStudents();
+    fetchAll();
   }, []);
 
   // ── Create ───────────────────────────────────────────────
@@ -73,7 +83,7 @@ export function ManageStudents() {
       success("Student added successfully");
       setNewStudent(emptyForm);
       setShowAddForm(false);
-      fetchStudents();
+      fetchAll();
     } catch (err: any) {
       error(err.message ?? "Failed to add student");
     } finally {
@@ -94,9 +104,9 @@ export function ManageStudents() {
         section: editStudent.section,
         rollNumber: editStudent.rollNumber,
       });
-      success("Student updated successfully");
+      success("Student updated");
       setEditStudent(null);
-      fetchStudents();
+      fetchAll();
     } catch (err: any) {
       error(err.message ?? "Failed to update student");
     } finally {
@@ -106,7 +116,7 @@ export function ManageStudents() {
 
   // ── Delete ───────────────────────────────────────────────
   const handleDelete = async (id: number) => {
-    if (!window.confirm("Delete this student? This cannot be undone.")) return;
+    if (!window.confirm("Delete this student?")) return;
     try {
       await deleteStudent(id);
       success("Student deleted");
@@ -116,7 +126,12 @@ export function ManageStudents() {
     }
   };
 
-  // ── Search ───────────────────────────────────────────────
+  // Filter out users who already have a student profile
+  const existingUserIds = new Set(students.map((s) => s.userId));
+  const availableUsers = studentUsers.filter(
+    (u) => !existingUserIds.has(u.userId),
+  );
+
   const filtered = students.filter(
     (s) =>
       `${s.firstName} ${s.lastName}`
@@ -134,17 +149,13 @@ export function ManageStudents() {
       <div className="flex justify-between items-start">
         <div>
           <h1 className="text-gray-900 mb-2">Manage Students</h1>
-          <p className="text-gray-600">Add, edit and manage student profiles</p>
+          <p className="text-gray-600">Add and manage student profiles</p>
         </div>
         <button
-          onClick={() => {
-            setShowAddForm(!showAddForm);
-            setEditStudent(null);
-          }}
+          onClick={() => setShowAddForm(!showAddForm)}
           className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
         >
-          <Plus className="w-4 h-4" />
-          Add Student
+          <Plus className="w-4 h-4" /> Add Student
         </button>
       </div>
 
@@ -164,21 +175,39 @@ export function ManageStudents() {
             onSubmit={handleAdd}
             className="grid grid-cols-1 md:grid-cols-2 gap-4"
           >
-            <div>
+            {/* User dropdown — no manual ID entry needed */}
+            <div className="md:col-span-2">
               <label className="block text-gray-700 mb-1 text-sm">
-                User ID <span className="text-red-500">*</span>
+                Select User Account <span className="text-red-500">*</span>
+                <span className="text-gray-400 ml-2 font-normal">
+                  (only Student-role accounts without a profile)
+                </span>
               </label>
-              <input
-                type="number"
-                required
-                value={newStudent.userId}
-                onChange={(e) =>
-                  setNewStudent({ ...newStudent, userId: e.target.value })
-                }
-                placeholder="Linked User ID"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
-              />
+              {availableUsers.length === 0 ? (
+                <div className="px-4 py-3 bg-yellow-50 border border-yellow-200 rounded-lg text-yellow-700 text-sm">
+                  No available Student accounts. Go to{" "}
+                  <strong>Manage Users</strong> → create a user with Student
+                  role first.
+                </div>
+              ) : (
+                <select
+                  required
+                  value={newStudent.userId}
+                  onChange={(e) =>
+                    setNewStudent({ ...newStudent, userId: e.target.value })
+                  }
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                >
+                  <option value="">Select user account</option>
+                  {availableUsers.map((u) => (
+                    <option key={u.userId} value={u.userId}>
+                      [ID: {u.userId}] {u.username} — {u.email}
+                    </option>
+                  ))}
+                </select>
+              )}
             </div>
+
             <div>
               <label className="block text-gray-700 mb-1 text-sm">
                 First Name <span className="text-red-500">*</span>
@@ -222,13 +251,11 @@ export function ManageStudents() {
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
               >
                 <option value="">Select Class</option>
-                {["Class 6", "Class 7", "Class 8", "Class 9", "Class 10"].map(
-                  (c) => (
-                    <option key={c} value={c}>
-                      {c}
-                    </option>
-                  ),
-                )}
+                {CLASSES.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
               </select>
             </div>
             <div>
@@ -244,7 +271,7 @@ export function ManageStudents() {
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
               >
                 <option value="">Select Section</option>
-                {["A", "B", "C", "D"].map((s) => (
+                {SECTIONS.map((s) => (
                   <option key={s} value={s}>
                     {s}
                   </option>
@@ -266,18 +293,19 @@ export function ManageStudents() {
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
               />
             </div>
+
             <div className="md:col-span-2 flex gap-3">
               <button
                 type="submit"
-                disabled={loading}
-                className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
+                disabled={loading || availableUsers.length === 0}
+                className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
               >
                 {loading ? "Adding..." : "Add Student"}
               </button>
               <button
                 type="button"
                 onClick={() => setShowAddForm(false)}
-                className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
               >
                 Cancel
               </button>
@@ -346,13 +374,11 @@ export function ManageStudents() {
                   }
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
                 >
-                  {["Class 6", "Class 7", "Class 8", "Class 9", "Class 10"].map(
-                    (c) => (
-                      <option key={c} value={c}>
-                        {c}
-                      </option>
-                    ),
-                  )}
+                  {CLASSES.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
                 </select>
               </div>
               <div>
@@ -367,7 +393,7 @@ export function ManageStudents() {
                   }
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
                 >
-                  {["A", "B", "C", "D"].map((s) => (
+                  {SECTIONS.map((s) => (
                     <option key={s} value={s}>
                       {s}
                     </option>
@@ -395,14 +421,14 @@ export function ManageStudents() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
+                  className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
                 >
                   {loading ? "Saving..." : "Save Changes"}
                 </button>
                 <button
                   type="button"
                   onClick={() => setEditStudent(null)}
-                  className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
                 >
                   Cancel
                 </button>
@@ -430,18 +456,15 @@ export function ManageStudents() {
       <div className="bg-white rounded-xl shadow-sm overflow-hidden">
         <div className="p-6 border-b flex items-center gap-3">
           <Users className="w-6 h-6 text-red-600" />
-          <h2 className="text-gray-900">Student List ({filtered.length})</h2>
+          <h2 className="text-gray-900">Students ({filtered.length})</h2>
         </div>
-
         {fetching ? (
-          <div className="p-8 text-center text-gray-500">
-            Loading students...
-          </div>
+          <div className="p-8 text-center text-gray-500">Loading...</div>
         ) : filtered.length === 0 ? (
           <div className="p-8 text-center text-gray-400">
             {searchTerm
               ? "No students match your search."
-              : "No students found. Add one above."}
+              : "No students yet. Add one above."}
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -458,7 +481,9 @@ export function ManageStudents() {
               <tbody className="divide-y divide-gray-200">
                 {filtered.map((s) => (
                   <tr key={s.studentId} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 text-gray-700">{s.rollNumber}</td>
+                    <td className="px-6 py-4 text-gray-700 font-mono">
+                      {s.rollNumber}
+                    </td>
                     <td className="px-6 py-4 text-gray-900 font-medium">
                       {s.firstName} {s.lastName}
                     </td>
@@ -468,14 +493,14 @@ export function ManageStudents() {
                       <div className="flex gap-2">
                         <button
                           onClick={() => setEditStudent(s)}
-                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"
                           title="Edit"
                         >
                           <Edit className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => handleDelete(s.studentId)}
-                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
                           title="Delete"
                         >
                           <Trash2 className="w-4 h-4" />

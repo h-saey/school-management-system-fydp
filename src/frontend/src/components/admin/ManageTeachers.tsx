@@ -5,6 +5,8 @@ import {
   createTeacher,
   updateTeacher,
   deleteTeacher,
+  getUsersByRole,
+  UserRecord,
 } from "../../services/api";
 import { useToast, ToastContainer } from "../../utils/useToast";
 
@@ -27,8 +29,8 @@ const emptyForm = {
 
 export function ManageTeachers() {
   const { toasts, success, error } = useToast();
-
   const [teachers, setTeachers] = useState<Teacher[]>([]);
+  const [teacherUsers, setTeacherUsers] = useState<UserRecord[]>([]);
   const [showAddForm, setShowAddForm] = useState(false);
   const [editTeacher, setEditTeacher] = useState<Teacher | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -36,20 +38,24 @@ export function ManageTeachers() {
   const [fetching, setFetching] = useState(true);
   const [newTeacher, setNewTeacher] = useState(emptyForm);
 
-  const fetchTeachers = async () => {
+  const fetchAll = async () => {
     try {
       setFetching(true);
-      const data = await getTeachers();
-      setTeachers(data);
+      const [t, u] = await Promise.all([
+        getTeachers(),
+        getUsersByRole("Teacher"),
+      ]);
+      setTeachers(t);
+      setTeacherUsers(u);
     } catch (err: any) {
-      error(err.message ?? "Failed to load teachers");
+      error(err.message ?? "Failed to load data");
     } finally {
       setFetching(false);
     }
   };
 
   useEffect(() => {
-    fetchTeachers();
+    fetchAll();
   }, []);
 
   const handleAdd = async (e: React.FormEvent) => {
@@ -62,10 +68,10 @@ export function ManageTeachers() {
         lastName: newTeacher.lastName,
         assignedSubjects: newTeacher.assignedSubjects,
       });
-      success("Teacher added successfully");
+      success("Teacher added");
       setNewTeacher(emptyForm);
       setShowAddForm(false);
-      fetchTeachers();
+      fetchAll();
     } catch (err: any) {
       error(err.message ?? "Failed to add teacher");
     } finally {
@@ -83,27 +89,31 @@ export function ManageTeachers() {
         lastName: editTeacher.lastName,
         assignedSubjects: editTeacher.assignedSubjects,
       });
-      success("Teacher updated successfully");
+      success("Teacher updated");
       setEditTeacher(null);
-      fetchTeachers();
+      fetchAll();
     } catch (err: any) {
-      error(err.message ?? "Failed to update teacher");
+      error(err.message ?? "Failed to update");
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = async (id: number) => {
-    if (!window.confirm("Delete this teacher? This cannot be undone.")) return;
+    if (!window.confirm("Delete this teacher?")) return;
     try {
       await deleteTeacher(id);
       success("Teacher deleted");
       setTeachers((prev) => prev.filter((t) => t.teacherId !== id));
     } catch (err: any) {
-      error(err.message ?? "Failed to delete teacher");
+      error(err.message ?? "Failed to delete");
     }
   };
 
+  const existingUserIds = new Set(teachers.map((t) => t.userId));
+  const availableUsers = teacherUsers.filter(
+    (u) => !existingUserIds.has(u.userId),
+  );
   const filtered = teachers.filter(
     (t) =>
       `${t.firstName} ${t.lastName}`
@@ -116,25 +126,19 @@ export function ManageTeachers() {
     <div className="space-y-6">
       <ToastContainer toasts={toasts} />
 
-      {/* HEADER */}
       <div className="flex justify-between items-start">
         <div>
           <h1 className="text-gray-900 mb-2">Manage Teachers</h1>
-          <p className="text-gray-600">Add, edit and manage teacher profiles</p>
+          <p className="text-gray-600">Add and manage teacher profiles</p>
         </div>
         <button
-          onClick={() => {
-            setShowAddForm(!showAddForm);
-            setEditTeacher(null);
-          }}
+          onClick={() => setShowAddForm(!showAddForm)}
           className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
         >
-          <Plus className="w-4 h-4" />
-          Add Teacher
+          <Plus className="w-4 h-4" /> Add Teacher
         </button>
       </div>
 
-      {/* ADD FORM */}
       {showAddForm && (
         <div className="bg-white rounded-xl shadow-sm p-6">
           <div className="flex justify-between items-center mb-4">
@@ -150,20 +154,35 @@ export function ManageTeachers() {
             onSubmit={handleAdd}
             className="grid grid-cols-1 md:grid-cols-2 gap-4"
           >
-            <div>
+            <div className="md:col-span-2">
               <label className="block text-gray-700 mb-1 text-sm">
-                User ID <span className="text-red-500">*</span>
+                User Account <span className="text-red-500">*</span>
+                <span className="text-gray-400 ml-2 font-normal">
+                  (Teacher-role accounts without a profile)
+                </span>
               </label>
-              <input
-                type="number"
-                required
-                value={newTeacher.userId}
-                onChange={(e) =>
-                  setNewTeacher({ ...newTeacher, userId: e.target.value })
-                }
-                placeholder="Linked User ID"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
-              />
+              {availableUsers.length === 0 ? (
+                <div className="px-4 py-3 bg-yellow-50 border border-yellow-200 rounded-lg text-yellow-700 text-sm">
+                  No available Teacher accounts. Create one in{" "}
+                  <strong>Manage Users</strong> first.
+                </div>
+              ) : (
+                <select
+                  required
+                  value={newTeacher.userId}
+                  onChange={(e) =>
+                    setNewTeacher({ ...newTeacher, userId: e.target.value })
+                  }
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                >
+                  <option value="">Select user account</option>
+                  {availableUsers.map((u) => (
+                    <option key={u.userId} value={u.userId}>
+                      [ID: {u.userId}] {u.username} — {u.email}
+                    </option>
+                  ))}
+                </select>
+              )}
             </div>
             <div>
               <label className="block text-gray-700 mb-1 text-sm">
@@ -195,7 +214,7 @@ export function ManageTeachers() {
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
               />
             </div>
-            <div>
+            <div className="md:col-span-2">
               <label className="block text-gray-700 mb-1 text-sm">
                 Assigned Subjects <span className="text-red-500">*</span>
               </label>
@@ -216,15 +235,15 @@ export function ManageTeachers() {
             <div className="md:col-span-2 flex gap-3">
               <button
                 type="submit"
-                disabled={loading}
-                className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
+                disabled={loading || availableUsers.length === 0}
+                className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
               >
                 {loading ? "Adding..." : "Add Teacher"}
               </button>
               <button
                 type="button"
                 onClick={() => setShowAddForm(false)}
-                className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
               >
                 Cancel
               </button>
@@ -233,7 +252,6 @@ export function ManageTeachers() {
         </div>
       )}
 
-      {/* EDIT MODAL */}
       {editTeacher && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-40 p-4">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-lg p-6">
@@ -302,14 +320,14 @@ export function ManageTeachers() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
+                  className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
                 >
                   {loading ? "Saving..." : "Save Changes"}
                 </button>
                 <button
                   type="button"
                   onClick={() => setEditTeacher(null)}
-                  className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
                 >
                   Cancel
                 </button>
@@ -319,7 +337,6 @@ export function ManageTeachers() {
         </div>
       )}
 
-      {/* SEARCH */}
       <div className="bg-white rounded-xl shadow-sm p-4">
         <div className="relative">
           <Search className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -333,21 +350,16 @@ export function ManageTeachers() {
         </div>
       </div>
 
-      {/* TABLE */}
       <div className="bg-white rounded-xl shadow-sm overflow-hidden">
         <div className="p-6 border-b flex items-center gap-3">
           <GraduationCap className="w-6 h-6 text-red-600" />
-          <h2 className="text-gray-900">Teacher List ({filtered.length})</h2>
+          <h2 className="text-gray-900">Teachers ({filtered.length})</h2>
         </div>
         {fetching ? (
-          <div className="p-8 text-center text-gray-500">
-            Loading teachers...
-          </div>
+          <div className="p-8 text-center text-gray-500">Loading...</div>
         ) : filtered.length === 0 ? (
           <div className="p-8 text-center text-gray-400">
-            {searchTerm
-              ? "No teachers match your search."
-              : "No teachers found. Add one above."}
+            {searchTerm ? "No teachers match." : "No teachers yet."}
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -356,7 +368,7 @@ export function ManageTeachers() {
                 <tr>
                   <th className="px-6 py-4 text-left text-gray-700">Name</th>
                   <th className="px-6 py-4 text-left text-gray-700">
-                    Assigned Subjects
+                    Subjects
                   </th>
                   <th className="px-6 py-4 text-left text-gray-700">Email</th>
                   <th className="px-6 py-4 text-left text-gray-700">Status</th>
@@ -366,18 +378,18 @@ export function ManageTeachers() {
               <tbody className="divide-y divide-gray-200">
                 {filtered.map((t) => (
                   <tr key={t.teacherId} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 text-gray-900 font-medium">
+                    <td className="px-6 py-4 font-medium text-gray-900">
                       {t.firstName} {t.lastName}
                     </td>
-                    <td className="px-6 py-4 text-gray-700">
+                    <td className="px-6 py-4 text-gray-700 text-sm">
                       {t.assignedSubjects}
                     </td>
-                    <td className="px-6 py-4 text-gray-700">
+                    <td className="px-6 py-4 text-gray-700 text-sm">
                       {t.email ?? "—"}
                     </td>
                     <td className="px-6 py-4">
                       <span
-                        className={`px-2 py-1 rounded-full text-xs font-medium ${t.isActive ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600"}`}
+                        className={`px-2 py-1 rounded-full text-xs font-medium ${t.isActive ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}
                       >
                         {t.isActive ? "Active" : "Inactive"}
                       </span>
@@ -386,15 +398,13 @@ export function ManageTeachers() {
                       <div className="flex gap-2">
                         <button
                           onClick={() => setEditTeacher(t)}
-                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                          title="Edit"
+                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"
                         >
                           <Edit className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => handleDelete(t.teacherId)}
-                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                          title="Delete"
+                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>

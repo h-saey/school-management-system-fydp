@@ -31,16 +31,16 @@ export function FeeStatus() {
 
   if (loading)
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500">Loading fees…</div>
+      <div className="flex min-h-[256px] items-center justify-center rounded-2xl border border-gray-200 bg-white p-8 shadow-sm">
+        <div className="text-sm font-medium text-gray-500">Loading fees…</div>
       </div>
     );
 
   if (error)
     return (
-      <div className="p-6 bg-red-50 rounded-xl border border-red-200 text-red-700">
-        <AlertCircle className="inline w-4 h-4 mr-2" />
-        {error}
+      <div className="flex items-start gap-2 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 shadow-sm sm:p-6">
+        <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
+        <span>{error}</span>
       </div>
     );
 
@@ -53,62 +53,74 @@ export function FeeStatus() {
   ).length;
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-gray-900 text-xl font-semibold mb-1">Fee Status</h1>
-        <p className="text-gray-500 text-sm">
+    <div className="space-y-6 sm:space-y-8">
+      <section className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm sm:p-6">
+        <h1 className="text-xl font-semibold tracking-tight text-gray-900 sm:text-2xl">
+          Fee Status
+        </h1>
+        <p className="mt-2 text-sm leading-6 text-gray-600 sm:text-base">
           View your fee records and payment status
         </p>
-      </div>
+      </section>
 
-      {/* Summary */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <section className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         {[
           {
             label: "Total Paid",
             value: `PKR ${totalPaid.toLocaleString()}`,
             icon: CheckCircle,
-            color: "text-green-500",
+            color: "text-green-600",
+            iconBg: "bg-green-50",
           },
           {
             label: "Outstanding",
             value: `PKR ${totalDue.toLocaleString()}`,
             icon: DollarSign,
-            color: pending > 0 ? "text-red-500" : "text-green-500",
+            color: pending > 0 ? "text-red-600" : "text-green-600",
+            iconBg: pending > 0 ? "bg-red-50" : "bg-green-50",
           },
           {
             label: "Pending Terms",
             value: String(pending),
             icon: Clock,
-            color: pending > 0 ? "text-red-500" : "text-green-500",
+            color: pending > 0 ? "text-red-600" : "text-green-600",
+            iconBg: pending > 0 ? "bg-red-50" : "bg-green-50",
           },
         ].map((s) => {
           const Icon = s.icon;
           return (
-            <div key={s.label} className="bg-white rounded-xl shadow-sm p-5">
-              <div className="flex items-center gap-3 mb-2">
-                <Icon className={`w-5 h-5 ${s.color}`} />
-                <span className="text-sm text-gray-600">{s.label}</span>
+            <article
+              key={s.label}
+              className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm sm:p-5"
+            >
+              <div className="mb-4 flex items-center gap-3">
+                <div className={`rounded-lg p-2 ${s.iconBg}`}>
+                  <Icon className={`h-5 w-5 ${s.color}`} />
+                </div>
+                <span className="text-sm font-medium text-gray-600">{s.label}</span>
               </div>
-              <p className="text-2xl font-bold text-gray-900">{s.value}</p>
-            </div>
+              <p className="text-2xl font-semibold tracking-tight text-gray-900">
+                {s.value}
+              </p>
+            </article>
           );
         })}
-      </div>
+      </section>
 
-      {/* Fee table */}
-      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-        <div className="p-5 border-b">
-          <h2 className="text-gray-900 font-medium">Fee Records</h2>
+      <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+        <div className="border-b border-gray-100 px-4 py-4 sm:px-6">
+          <h2 className="text-base font-semibold text-gray-900 sm:text-lg">
+            Fee Records
+          </h2>
         </div>
         {fees.length === 0 ? (
-          <div className="p-10 text-center text-gray-400 text-sm">
+          <div className="px-4 py-12 text-center text-sm text-gray-500 sm:px-6">
             No fee records found.
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-gray-50">
+            <table className="min-w-full text-sm">
+              <thead className="bg-gray-50/80">
                 <tr>
                   {[
                     "Term",
@@ -120,7 +132,7 @@ export function FeeStatus() {
                   ].map((h) => (
                     <th
                       key={h}
-                      className="px-5 py-3 text-left text-gray-600 font-medium"
+                      className="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 sm:px-6"
                     >
                       {h}
                     </th>
@@ -129,25 +141,25 @@ export function FeeStatus() {
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {fees.map((f) => (
-                  <tr key={f.feeId} className="hover:bg-gray-50">
-                    <td className="px-5 py-3 text-gray-900 font-medium">
+                  <tr key={f.feeId} className="transition-colors hover:bg-gray-50/70">
+                    <td className="whitespace-nowrap px-4 py-4 font-medium text-gray-900 sm:px-6">
                       {f.term}
                     </td>
-                    <td className="px-5 py-3 text-gray-700">
+                    <td className="whitespace-nowrap px-4 py-4 text-gray-700 sm:px-6">
                       PKR {f.totalAmount.toLocaleString()}
                     </td>
-                    <td className="px-5 py-3 text-green-700">
+                    <td className="whitespace-nowrap px-4 py-4 text-green-700 sm:px-6">
                       PKR {f.paidAmount.toLocaleString()}
                     </td>
-                    <td className="px-5 py-3 text-red-700">
+                    <td className="whitespace-nowrap px-4 py-4 text-red-700 sm:px-6">
                       PKR {(f.totalAmount - f.paidAmount).toLocaleString()}
                     </td>
-                    <td className="px-5 py-3 text-gray-600">
+                    <td className="whitespace-nowrap px-4 py-4 text-gray-600 sm:px-6">
                       {new Date(f.dueDate).toLocaleDateString()}
                     </td>
-                    <td className="px-5 py-3">
+                    <td className="whitespace-nowrap px-4 py-4 sm:px-6">
                       <span
-                        className={`px-2.5 py-1 rounded-full text-xs font-medium ${statusBadge(f.status)}`}
+                        className={`rounded-full px-2.5 py-1 text-xs font-medium ${statusBadge(f.status)}`}
                       >
                         {f.status}
                       </span>
@@ -158,16 +170,16 @@ export function FeeStatus() {
             </table>
           </div>
         )}
-      </div>
+      </section>
 
       {pending > 0 && (
-        <div className="bg-yellow-50 border-l-4 border-yellow-500 rounded-xl p-4 flex items-start gap-3">
-          <AlertCircle className="w-5 h-5 text-yellow-500 mt-0.5 shrink-0" />
-          <p className="text-yellow-800 text-sm">
+        <section className="flex items-start gap-3 rounded-2xl border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-800 shadow-sm">
+          <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-yellow-600" />
+          <p>
             You have <strong>{pending}</strong> pending fee(s). Please contact
             the admin to process payment.
           </p>
-        </div>
+        </section>
       )}
     </div>
   );
