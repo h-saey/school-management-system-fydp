@@ -70,7 +70,9 @@ export function BehaviourComplaints() {
     const isNegative = r.remarkType === "Negative";
     return {
       date: new Date(r.date).toLocaleDateString(),
-      teacher: `${r.teacher.firstName} ${r.teacher.lastName}`,
+      teacher: r.teacher
+        ? `${r.teacher.firstName} ${r.teacher.lastName}`
+        : "By Admin",
       subject: "",
       type: r.remarkType,
       remark: r.remarkText,

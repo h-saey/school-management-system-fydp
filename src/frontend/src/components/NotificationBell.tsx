@@ -20,17 +20,11 @@ const typeIcon = (type: string) => {
   switch (type.toLowerCase()) {
     case "riskalert":
       return (
-        <AlertTriangle
-          className="h-4 w-4 shrink-0 text-red-600"
-          aria-hidden
-        />
+        <AlertTriangle className="h-4 w-4 shrink-0 text-red-600" aria-hidden />
       );
     case "fee":
       return (
-        <DollarSign
-          className="h-4 w-4 shrink-0 text-orange-600"
-          aria-hidden
-        />
+        <DollarSign className="h-4 w-4 shrink-0 text-orange-600" aria-hidden />
       );
     case "marks":
       return (
@@ -41,9 +35,7 @@ const typeIcon = (type: string) => {
         <BookOpen className="h-4 w-4 shrink-0 text-emerald-600" aria-hidden />
       );
     default:
-      return (
-        <Info className="h-4 w-4 shrink-0 text-slate-400" aria-hidden />
-      );
+      return <Info className="h-4 w-4 shrink-0 text-slate-400" aria-hidden />;
   }
 };
 
@@ -153,9 +145,7 @@ export function NotificationBell({
 
       {/* Dropdown panel */}
       {open && (
-        <div
-          className="absolute right-0 top-full z-50 mt-2 flex max-h-[420px] w-[min(20rem,calc(100vw-1.5rem))] flex-col overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-2xl shadow-slate-900/15 sm:w-80"
-        >
+        <div className="absolute right-0 top-full z-50 mt-2 flex max-h-[420px] w-[min(20rem,calc(100vw-1.5rem))] flex-col overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-2xl shadow-slate-900/15 sm:w-80">
           {/* Header */}
           <div className="flex shrink-0 items-center justify-between gap-2 border-b border-slate-100 bg-white px-3 py-3 sm:px-4">
             <div className="flex min-w-0 items-center gap-2">

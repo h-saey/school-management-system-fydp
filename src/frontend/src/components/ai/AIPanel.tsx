@@ -340,7 +340,7 @@ export function AIPanel({ onClose, userRole }: AIPanelProps) {
             <div className="flex gap-2">
               {/* Search input */}
               <div className="relative flex-1">
-                <Search className="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                {/*<Search className="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />*/}
                 <input
                   type="text"
                   value={rollNumber}
