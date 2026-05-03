@@ -263,9 +263,9 @@ namespace SMS_Backend.Data
             //    .HasIndex(u => u.Email)
             //    .IsUnique();
 
-            modelBuilder.Entity<User>()
-                .HasIndex(u => u.Username)
-                .IsUnique();
+            //modelBuilder.Entity<User>()
+            //    .HasIndex(u => u.Username)
+            //    .IsUnique();
 
             // ── Decimal precision ────────────────────────────
             modelBuilder.Entity<Mark>()

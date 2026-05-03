@@ -38,7 +38,7 @@ namespace SMS_Backend.ML
             var pipeline =
                 _mlContext.Transforms.Conversion
                     .MapValueToKey(
-                        inputColumnName: "Label",   // ✅ must match [ColumnName("Label")]
+                        inputColumnName: "Label",   
                         outputColumnName: "Label")
                 .Append(_mlContext.Transforms.Concatenate(
                     "Features",
