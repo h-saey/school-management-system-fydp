@@ -1,6 +1,3 @@
-// FILE: src/components/teacher/UploadCertificates.tsx
-// ACTION: REPLACE existing file entirely
-
 import React, { useEffect, useState } from "react";
 import {
   Award,
@@ -34,14 +31,14 @@ const CATEGORIES = [
 ];
 
 const CATEGORY_COLORS: Record<string, string> = {
-  Academic: "bg-blue-100 text-blue-700",
-  Sports: "bg-green-100 text-green-700",
-  Arts: "bg-pink-100 text-pink-700",
-  Science: "bg-purple-100 text-purple-700",
-  Technology: "bg-indigo-100 text-indigo-700",
-  Cultural: "bg-orange-100 text-orange-700",
-  Leadership: "bg-yellow-100 text-yellow-700",
-  Other: "bg-gray-100 text-gray-700",
+  Academic: "border border-blue-200/80 bg-blue-50 text-blue-800",
+  Sports: "border border-emerald-200/80 bg-emerald-50 text-emerald-800",
+  Arts: "border border-pink-200/80 bg-pink-50 text-pink-800",
+  Science: "border border-violet-200/80 bg-violet-50 text-violet-800",
+  Technology: "border border-indigo-200/80 bg-indigo-50 text-indigo-800",
+  Cultural: "border border-orange-200/80 bg-orange-50 text-orange-800",
+  Leadership: "border border-amber-200/80 bg-amber-50 text-amber-900",
+  Other: "border border-slate-200/80 bg-slate-100 text-slate-800",
 };
 
 interface FormState {
@@ -159,75 +156,104 @@ export function UploadCertificates() {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="min-w-0 space-y-8 sm:space-y-10">
       {/* Header */}
-      <div className="flex items-center justify-between flex-wrap gap-4">
-        <div>
-          <h1 className="text-gray-900 font-bold text-2xl mb-1">
+      <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between sm:gap-8">
+        <div className="min-w-0 space-y-2">
+          <h1 className="text-balance text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
             Upload Achievements & Certificates
           </h1>
-          <p className="text-gray-600">
+          <p className="max-w-2xl text-pretty text-sm leading-relaxed text-slate-600 sm:text-base">
             Record student achievements, awards, and certificates
           </p>
         </div>
         <button
+          type="button"
           onClick={() => {
             setShowForm(true);
             setError(null);
             setSuccessMsg(null);
           }}
-          className="flex items-center gap-2 px-5 py-2.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium"
+          className="inline-flex shrink-0 items-center justify-center gap-2.5 rounded-xl bg-purple-600 px-5 py-3 text-sm font-semibold text-white shadow-sm shadow-purple-600/25 transition-colors hover:bg-purple-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-600 active:bg-purple-800 sm:px-6 sm:py-3.5"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="h-4 w-4 shrink-0" aria-hidden />
           Add Achievement
         </button>
       </div>
 
       {/* Feedback */}
       {error && (
-        <div className="flex items-center gap-3 bg-red-50 border border-red-200 rounded-xl p-4 text-red-700">
-          <AlertTriangle className="w-5 h-5 flex-shrink-0" />
-          <p className="text-sm flex-1">{error}</p>
-          <button onClick={() => setError(null)}>
-            <X className="w-4 h-4" />
+        <div
+          className="flex items-start gap-4 rounded-2xl border border-red-200/90 bg-red-50/90 p-5 text-red-800 shadow-sm sm:items-center sm:p-5"
+          role="alert"
+        >
+          <AlertTriangle
+            className="mt-0.5 h-5 w-5 shrink-0 text-red-600 sm:mt-0"
+            aria-hidden
+          />
+          <p className="min-w-0 flex-1 text-sm font-medium leading-relaxed">
+            {error}
+          </p>
+          <button
+            type="button"
+            onClick={() => setError(null)}
+            className="shrink-0 rounded-lg p-2 text-red-600 transition-colors hover:bg-red-100/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600"
+            aria-label="Dismiss error"
+          >
+            <X className="h-4 w-4" />
           </button>
         </div>
       )}
       {successMsg && (
-        <div className="flex items-center gap-3 bg-green-50 border border-green-200 rounded-xl p-4 text-green-700">
-          <CheckCircle className="w-5 h-5 flex-shrink-0" />
-          <p className="text-sm flex-1">{successMsg}</p>
-          <button onClick={() => setSuccessMsg(null)}>
-            <X className="w-4 h-4" />
+        <div
+          className="flex items-start gap-4 rounded-2xl border border-emerald-200/90 bg-emerald-50/90 p-5 text-emerald-900 shadow-sm sm:items-center sm:p-5"
+          role="status"
+        >
+          <CheckCircle
+            className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600 sm:mt-0"
+            aria-hidden
+          />
+          <p className="min-w-0 flex-1 text-sm font-medium leading-relaxed">
+            {successMsg}
+          </p>
+          <button
+            type="button"
+            onClick={() => setSuccessMsg(null)}
+            className="shrink-0 rounded-lg p-2 text-emerald-700 transition-colors hover:bg-emerald-100/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600"
+            aria-label="Dismiss message"
+          >
+            <X className="h-4 w-4" />
           </button>
         </div>
       )}
 
       {/* Add Form Modal */}
       {showForm && (
-        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg">
-            <div className="flex items-center justify-between p-6 border-b">
-              <h2 className="text-gray-900 font-semibold text-lg">
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/50 p-0 backdrop-blur-[2px] sm:items-center sm:p-6">
+          <div className="flex max-h-[min(100dvh,900px)] w-full max-w-lg flex-col overflow-hidden rounded-t-2xl border border-slate-200/80 bg-white shadow-2xl shadow-slate-900/15 sm:max-h-[90vh] sm:rounded-2xl">
+            <div className="flex shrink-0 items-center justify-between gap-4 border-b border-slate-100 px-5 py-5 sm:px-8 sm:py-6">
+              <h2 className="text-lg font-semibold tracking-tight text-slate-900 sm:text-xl">
                 Record New Achievement
               </h2>
               <button
+                type="button"
                 onClick={() => {
                   setShowForm(false);
                   setForm(EMPTY_FORM);
                   setError(null);
                 }}
-                className="text-gray-400 hover:text-gray-700 transition-colors"
+                className="shrink-0 rounded-xl p-2.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-600"
+                aria-label="Close dialog"
               >
-                <X className="w-5 h-5" />
+                <X className="h-5 w-5" />
               </button>
             </div>
 
-            <div className="p-6 space-y-4">
+            <div className="min-h-0 flex-1 space-y-6 overflow-y-auto overscroll-contain px-5 py-7 sm:px-8 sm:py-8">
               {/* Student */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Student <span className="text-red-500">*</span>
+              <div className="space-y-2">
+                <label className="block text-sm font-semibold text-slate-700">
+                  Student <span className="font-normal text-red-600">*</span>
                 </label>
                 <select
                   value={form.studentId}
@@ -237,7 +263,7 @@ export function UploadCertificates() {
                       studentId: Number(e.target.value) || "",
                     }))
                   }
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/30 sm:px-5 sm:py-3.5"
                 >
                   <option value="">— Select Student —</option>
                   {students.map((s) => (
@@ -249,9 +275,10 @@ export function UploadCertificates() {
               </div>
 
               {/* Title */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Achievement Title <span className="text-red-500">*</span>
+              <div className="space-y-2">
+                <label className="block text-sm font-semibold text-slate-700">
+                  Achievement Title{" "}
+                  <span className="font-normal text-red-600">*</span>
                 </label>
                 <input
                   type="text"
@@ -260,25 +287,25 @@ export function UploadCertificates() {
                     setForm((f) => ({ ...f, title: e.target.value }))
                   }
                   placeholder="e.g., First Place in Science Olympiad"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/30 sm:px-5 sm:py-3.5"
                 />
               </div>
 
               {/* Category */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+              <div className="space-y-3">
+                <label className="block text-sm font-semibold text-slate-700">
                   Category
                 </label>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2.5">
                   {CATEGORIES.map((cat) => (
                     <button
                       key={cat}
                       type="button"
                       onClick={() => setForm((f) => ({ ...f, category: cat }))}
-                      className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-all ${
+                      className={`inline-flex items-center rounded-full border px-3.5 py-2 text-xs font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-600 sm:text-sm ${
                         form.category === cat
-                          ? "bg-purple-600 text-white border-purple-600"
-                          : "border-gray-300 text-gray-600 hover:border-purple-400"
+                          ? "border-purple-600 bg-purple-600 text-white shadow-sm shadow-purple-600/20 hover:bg-purple-700"
+                          : "border-slate-200 bg-white text-slate-600 hover:border-purple-300 hover:bg-slate-50 active:bg-slate-100"
                       }`}
                     >
                       {cat}
@@ -288,9 +315,9 @@ export function UploadCertificates() {
               </div>
 
               {/* Date */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Date <span className="text-red-500">*</span>
+              <div className="space-y-2">
+                <label className="block text-sm font-semibold text-slate-700">
+                  Date <span className="font-normal text-red-600">*</span>
                 </label>
                 <input
                   type="date"
@@ -299,15 +326,17 @@ export function UploadCertificates() {
                   onChange={(e) =>
                     setForm((f) => ({ ...f, date: e.target.value }))
                   }
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/30 sm:px-5 sm:py-3.5"
                 />
               </div>
 
               {/* File Path / URL (optional) */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+              <div className="space-y-2">
+                <label className="block text-sm font-semibold text-slate-700">
                   Certificate Link / File Path{" "}
-                  <span className="text-gray-400 text-xs">(optional)</span>
+                  <span className="text-xs font-normal text-slate-500">
+                    (optional)
+                  </span>
                 </label>
                 <input
                   type="text"
@@ -316,38 +345,40 @@ export function UploadCertificates() {
                     setForm((f) => ({ ...f, filePath: e.target.value }))
                   }
                   placeholder="https://drive.google.com/... or /uploads/cert.pdf"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/30 sm:px-5 sm:py-3.5"
                 />
-                <p className="text-xs text-gray-400 mt-1">
+                <p className="text-xs leading-relaxed text-slate-500">
                   Paste a URL or file path to the certificate document.
                 </p>
               </div>
             </div>
 
-            <div className="p-6 border-t flex justify-end gap-3">
+            <div className="flex shrink-0 flex-col-reverse gap-3 border-t border-slate-100 bg-slate-50/50 px-5 py-5 sm:flex-row sm:justify-end sm:gap-4 sm:px-8 sm:py-6">
               <button
+                type="button"
                 onClick={() => {
                   setShowForm(false);
                   setForm(EMPTY_FORM);
                   setError(null);
                 }}
-                className="px-5 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                className="inline-flex w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-400 active:bg-slate-100 sm:w-auto sm:px-6 sm:py-3.5"
               >
                 Cancel
               </button>
               <button
+                type="button"
                 onClick={handleSubmit}
                 disabled={submitting}
-                className="flex items-center gap-2 px-5 py-2.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors font-medium"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-purple-600 px-5 py-3 text-sm font-semibold text-white shadow-sm shadow-purple-600/25 transition-colors hover:bg-purple-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-600 active:bg-purple-800 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:px-6 sm:py-3.5"
               >
                 {submitting ? (
                   <>
-                    <RefreshCw className="w-4 h-4 animate-spin" />
+                    <RefreshCw className="h-4 w-4 shrink-0 animate-spin" />
                     Saving…
                   </>
                 ) : (
                   <>
-                    <Award className="w-4 h-4" />
+                    <Award className="h-4 w-4 shrink-0" />
                     Save Achievement
                   </>
                 )}
@@ -358,116 +389,154 @@ export function UploadCertificates() {
       )}
 
       {/* Stats Bar */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-5">
         {[
           {
             label: "Total Achievements",
             value: achievements.length,
-            color: "text-purple-600",
-            bg: "bg-purple-50",
+            color: "text-purple-700",
+            bg: "bg-purple-50/90",
+            ring: "ring-purple-100/80",
           },
           ...["Academic", "Sports", "Arts"].map((cat) => ({
             label: cat,
             value: achievements.filter((a) => a.category === cat).length,
-            color: "text-blue-600",
-            bg: "bg-blue-50",
+            ...(cat === "Academic"
+              ? {
+                  color: "text-blue-700",
+                  bg: "bg-blue-50/90",
+                  ring: "ring-blue-100/80",
+                }
+              : cat === "Sports"
+                ? {
+                    color: "text-emerald-700",
+                    bg: "bg-emerald-50/90",
+                    ring: "ring-emerald-100/80",
+                  }
+                : {
+                    color: "text-rose-700",
+                    bg: "bg-rose-50/90",
+                    ring: "ring-rose-100/80",
+                  }),
           })),
-        ].map(({ label, value, color, bg }) => (
-          <div key={label} className={`${bg} rounded-xl p-4`}>
-            <p className={`text-2xl font-bold ${color}`}>{value}</p>
-            <p className="text-gray-600 text-sm">{label}</p>
+        ].map(({ label, value, color, bg, ring }) => (
+          <div
+            key={label}
+            className={`rounded-2xl border border-slate-100/80 p-5 shadow-sm ring-1 sm:p-6 ${ring} ${bg}`}
+          >
+            <p
+              className={`text-2xl font-bold tabular-nums tracking-tight sm:text-3xl ${color}`}
+            >
+              {value}
+            </p>
+            <p className="mt-2 text-xs font-medium text-slate-600 sm:text-sm">
+              {label}
+            </p>
           </div>
         ))}
       </div>
 
       {/* Filters */}
-      <div className="flex flex-wrap gap-3 items-center">
-        <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Search by student or title…"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white"
-          />
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {["All", ...CATEGORIES].map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setFilterCategory(cat)}
-              className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-all ${
-                filterCategory === cat
-                  ? "bg-purple-600 text-white border-purple-600"
-                  : "border-gray-300 text-gray-600 hover:border-purple-400"
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
+      <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm sm:p-6">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:gap-6">
+          <div className="relative min-w-0 flex-1">
+            <Search
+              className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 sm:h-5 sm:w-5"
+              aria-hidden
+            />
+            <input
+              type="text"
+              placeholder="Search by student or title…"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full rounded-xl border border-slate-200 bg-slate-50/50 py-3 pl-11 pr-4 text-sm text-slate-900 shadow-inner shadow-slate-900/5 placeholder:text-slate-400 focus:border-purple-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/25 sm:py-3.5 sm:pl-12"
+            />
+          </div>
+          <div className="flex min-w-0 flex-wrap gap-2.5 lg:max-w-[50%] lg:justify-end xl:max-w-none">
+            {["All", ...CATEGORIES].map((cat) => (
+              <button
+                type="button"
+                key={cat}
+                onClick={() => setFilterCategory(cat)}
+                className={`inline-flex items-center rounded-full border px-3 py-2 text-xs font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-600 sm:px-3.5 sm:text-sm ${
+                  filterCategory === cat
+                    ? "border-purple-600 bg-purple-600 text-white shadow-sm shadow-purple-600/20 hover:bg-purple-700"
+                    : "border-slate-200 bg-white text-slate-600 hover:border-purple-300 hover:bg-slate-50 active:bg-slate-100"
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
       {/* Achievements Grid */}
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-6 xl:grid-cols-3">
           {[...Array(6)].map((_, i) => (
             <div
               key={i}
-              className="bg-white rounded-xl shadow-sm p-6 h-36 animate-pulse"
+              className="h-40 animate-pulse rounded-2xl border border-slate-100 bg-slate-100/80 sm:h-36"
             />
           ))}
         </div>
       ) : filtered.length === 0 ? (
-        <div className="bg-white rounded-xl shadow-sm p-16 text-center text-gray-400">
-          <Award className="w-12 h-12 mx-auto mb-4 opacity-40" />
-          <p className="text-lg font-medium">No achievements found</p>
-          <p className="text-sm mt-1">
+        <div className="rounded-2xl border border-dashed border-slate-200 bg-white px-6 py-16 text-center shadow-sm sm:px-10 sm:py-20">
+          <Award
+            className="mx-auto mb-5 h-12 w-12 text-slate-300"
+            aria-hidden
+          />
+          <p className="text-base font-semibold text-slate-700 sm:text-lg">
+            No achievements found
+          </p>
+          <p className="mt-3 text-sm leading-relaxed text-slate-500">
             {achievements.length === 0
               ? "Click 'Add Achievement' to record the first one."
               : "Try adjusting your filters."}
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-6 xl:grid-cols-3">
           {filtered.map((a) => (
             <div
               key={a.achievementId}
-              className="bg-white rounded-xl shadow-sm p-5 hover:shadow-md transition-shadow relative"
+              className="group relative rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm transition-shadow hover:border-slate-300 hover:shadow-md sm:p-7"
             >
-              <div className="flex items-start justify-between gap-2 mb-3">
+              <div className="mb-4 flex items-start justify-between gap-3 sm:mb-5">
                 <span
-                  className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                    CATEGORY_COLORS[a.category] || "bg-gray-100 text-gray-700"
+                  className={`inline-flex max-w-[85%] items-center rounded-full px-3 py-1 text-xs font-semibold leading-tight ${
+                    CATEGORY_COLORS[a.category] ||
+                    "border border-slate-200 bg-slate-100 text-slate-800"
                   }`}
                 >
                   {a.category}
                 </span>
                 <button
+                  type="button"
                   onClick={() => handleDelete(a.achievementId, a.title)}
                   disabled={deletingId === a.achievementId}
-                  className="text-gray-400 hover:text-red-500 transition-colors disabled:opacity-40"
+                  className="-m-1 shrink-0 rounded-xl p-2.5 text-slate-400 transition-colors hover:bg-red-50 hover:text-red-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500 disabled:cursor-not-allowed disabled:opacity-40"
                   title="Delete achievement"
                 >
                   {deletingId === a.achievementId ? (
-                    <RefreshCw className="w-4 h-4 animate-spin" />
+                    <RefreshCw className="h-4 w-4 animate-spin" />
                   ) : (
-                    <Trash2 className="w-4 h-4" />
+                    <Trash2 className="h-4 w-4" />
                   )}
                 </button>
               </div>
 
-              <h3 className="font-semibold text-gray-900 mb-1 leading-snug">
+              <h3 className="mb-2 text-base font-semibold leading-snug tracking-tight text-slate-900 sm:text-[1.05rem]">
                 {a.title}
               </h3>
-              <p className="text-sm text-gray-600 mb-1">
+              <p className="text-sm leading-relaxed text-slate-600">
                 👤 {a.student.firstName} {a.student.lastName}
-                <span className="text-gray-400 ml-1">
+                <span className="ml-1 text-slate-400">
                   ({a.student.rollNumber})
                 </span>
               </p>
-              <p className="text-xs text-gray-400">
+              <p className="mt-2 text-xs font-medium text-slate-500 sm:text-sm">
                 📅{" "}
                 {new Date(a.date).toLocaleDateString("en-PK", {
                   year: "numeric",
@@ -481,7 +550,7 @@ export function UploadCertificates() {
                   href={a.filePath}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="mt-3 inline-flex items-center gap-1 text-xs text-purple-600 hover:text-purple-800 underline"
+                  className="mt-5 inline-flex items-center gap-1.5 rounded-lg text-xs font-semibold text-purple-700 underline decoration-purple-300 underline-offset-2 transition-colors hover:text-purple-900 hover:decoration-purple-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-600 sm:mt-6"
                 >
                   📄 View Certificate
                 </a>

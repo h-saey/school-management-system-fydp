@@ -151,55 +151,64 @@ export function DataReporting() {
     : [];
 
   return (
-    <div className="space-y-6">
+    <div className="min-w-0 space-y-6 sm:space-y-8">
       <ToastContainer toasts={toasts} />
 
       {/* HEADER */}
-      <div>
-        <h1 className="text-gray-900 mb-2">Data Reporting</h1>
-        <p className="text-gray-600">
+      <div className="space-y-1">
+        <h1 className="text-balance text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+          Data Reporting
+        </h1>
+        <p className="max-w-2xl text-pretty text-sm leading-relaxed text-slate-600 sm:text-base">
           Generate reports and AI-powered analytics insights
         </p>
       </div>
 
       {/* REPORT TYPE SELECTOR */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
         {REPORT_TYPES.map((rt) => (
           <button
+            type="button"
             key={rt.id}
             onClick={() => setReportType(rt.id)}
-            className={`p-4 rounded-xl border text-left transition-all ${
+            className={`rounded-2xl border p-3 text-left shadow-sm transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 sm:p-4 ${
               reportType === rt.id
-                ? "border-red-500 bg-red-50"
-                : "border-gray-200 bg-white hover:border-gray-300"
+                ? "border-red-500 bg-red-50/90 ring-1 ring-red-200/80"
+                : "border-slate-200/90 bg-white hover:border-slate-300 hover:bg-slate-50/80 active:bg-slate-100/80"
             }`}
           >
             <rt.icon
-              className={`w-5 h-5 mb-2 ${reportType === rt.id ? "text-red-600" : "text-gray-500"}`}
+              className={`mb-2 h-5 w-5 ${reportType === rt.id ? "text-red-600" : "text-slate-500"}`}
+              aria-hidden
             />
             <p
-              className={`font-medium text-sm ${reportType === rt.id ? "text-red-700" : "text-gray-900"}`}
+              className={`text-sm font-semibold ${reportType === rt.id ? "text-red-800" : "text-slate-900"}`}
             >
               {rt.label}
             </p>
-            <p className="text-xs text-gray-500 mt-0.5">{rt.description}</p>
+            <p className="mt-0.5 text-xs leading-relaxed text-slate-500">
+              {rt.description}
+            </p>
           </button>
         ))}
       </div>
 
       {/* FILTERS */}
-      <div className="bg-white rounded-xl shadow-sm p-6">
-        <h2 className="text-gray-900 mb-4 flex items-center gap-2">
-          <ChevronDown className="w-5 h-5 text-gray-500" /> Smart Filters
+      <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm sm:p-6">
+        <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold tracking-tight text-slate-900 sm:text-xl">
+          <ChevronDown className="h-5 w-5 shrink-0 text-slate-400" aria-hidden />{" "}
+          Smart Filters
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 md:gap-5">
           {/* Class */}
-          <div>
-            <label className="block text-gray-700 mb-1 text-sm">Class</label>
+          <div className="space-y-1.5">
+            <label className="block text-sm font-semibold text-slate-700">
+              Class
+            </label>
             <select
               value={className}
               onChange={(e) => setClassName(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+              className="w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30"
             >
               <option value="">All Classes</option>
               {CLASSES.map((c) => (
@@ -211,33 +220,35 @@ export function DataReporting() {
           </div>
 
           {/* Date From */}
-          <div>
-            <label className="block text-gray-700 mb-1 text-sm">
+          <div className="space-y-1.5">
+            <label className="block text-sm font-semibold text-slate-700">
               Date From
             </label>
             <input
               type="date"
               value={fromDate}
               onChange={(e) => setFromDate(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+              className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30"
             />
           </div>
 
           {/* Date To */}
-          <div>
-            <label className="block text-gray-700 mb-1 text-sm">Date To</label>
+          <div className="space-y-1.5">
+            <label className="block text-sm font-semibold text-slate-700">
+              Date To
+            </label>
             <input
               type="date"
               value={toDate}
               onChange={(e) => setToDate(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+              className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30"
             />
           </div>
 
           {/* Subject (marks only) */}
           {reportType === "marks" && (
-            <div>
-              <label className="block text-gray-700 mb-1 text-sm">
+            <div className="space-y-1.5">
+              <label className="block text-sm font-semibold text-slate-700">
                 Subject
               </label>
               <input
@@ -245,21 +256,21 @@ export function DataReporting() {
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
                 placeholder="e.g. Math"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30"
               />
             </div>
           )}
 
           {/* Risk Level (AI report only) */}
           {reportType === "risk-analysis" && (
-            <div>
-              <label className="block text-gray-700 mb-1 text-sm">
+            <div className="space-y-1.5">
+              <label className="block text-sm font-semibold text-slate-700">
                 Risk Level ✨
               </label>
               <select
                 value={riskFilter}
                 onChange={(e) => setRiskFilter(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                className="w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30"
               >
                 <option value="">All Levels</option>
                 <option value="High">High</option>
@@ -272,8 +283,8 @@ export function DataReporting() {
           {/* Performance Range (AI report only) */}
           {reportType === "risk-analysis" && (
             <>
-              <div>
-                <label className="block text-gray-700 mb-1 text-sm">
+              <div className="space-y-1.5">
+                <label className="block text-sm font-semibold text-slate-700">
                   Min Marks % ✨
                 </label>
                 <input
@@ -283,11 +294,11 @@ export function DataReporting() {
                   value={minMarks}
                   onChange={(e) => setMinMarks(e.target.value)}
                   placeholder="e.g. 0"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30"
                 />
               </div>
-              <div>
-                <label className="block text-gray-700 mb-1 text-sm">
+              <div className="space-y-1.5">
+                <label className="block text-sm font-semibold text-slate-700">
                   Max Marks % ✨
                 </label>
                 <input
@@ -297,25 +308,26 @@ export function DataReporting() {
                   value={maxMarks}
                   onChange={(e) => setMaxMarks(e.target.value)}
                   placeholder="e.g. 100"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30"
                 />
               </div>
             </>
           )}
         </div>
 
-        <div className="flex gap-3 mt-4">
+        <div className="mt-5 flex flex-col gap-2 sm:mt-6 sm:flex-row sm:flex-wrap sm:gap-3">
           <button
+            type="button"
             onClick={handleGenerate}
             disabled={generating || loadingAI}
-            className="flex items-center gap-2 px-5 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-red-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-red-600/25 transition-colors hover:bg-red-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 active:bg-red-800 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {generating || loadingAI ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
             ) : reportType === "risk-analysis" ? (
-              <Brain className="w-4 h-4" />
+              <Brain className="h-4 w-4" aria-hidden />
             ) : (
-              <Download className="w-4 h-4" />
+              <Download className="h-4 w-4" aria-hidden />
             )}
             {reportType === "risk-analysis"
               ? "Run AI Analysis"
@@ -324,12 +336,14 @@ export function DataReporting() {
 
           {reportType === "risk-analysis" && (
             <button
+              type="button"
               onClick={handleApplyFilters}
               disabled={loadingAI}
-              className="flex items-center gap-2 px-5 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-400 active:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <RefreshCw
-                className={`w-4 h-4 ${loadingAI ? "animate-spin" : ""}`}
+                className={`h-4 w-4 ${loadingAI ? "animate-spin" : ""}`}
+                aria-hidden
               />
               Apply Filters
             </button>
@@ -341,9 +355,12 @@ export function DataReporting() {
       {reportType === "risk-analysis" && (
         <>
           {loadingAI && (
-            <div className="bg-white rounded-xl shadow-sm p-8 text-center">
-              <Loader2 className="w-8 h-8 animate-spin text-red-600 mx-auto mb-3" />
-              <p className="text-gray-500">
+            <div className="rounded-2xl border border-slate-200/80 bg-white px-4 py-10 text-center shadow-sm sm:py-12">
+              <Loader2
+                className="mx-auto mb-3 h-8 w-8 animate-spin text-red-600"
+                aria-hidden
+              />
+              <p className="text-sm font-medium text-slate-600">
                 Running AI analysis on all students...
               </p>
             </div>
@@ -352,35 +369,47 @@ export function DataReporting() {
           {aiData && !loadingAI && (
             <>
               {/* Analytics Insights */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
                 {[
                   {
                     label: "Total Students",
                     value: aiData.insights.totalStudents,
-                    color: "text-gray-900",
+                    color: "text-slate-900",
+                    ring: "ring-slate-200/80",
+                    bg: "bg-slate-50/90",
                   },
                   {
                     label: "High Risk %",
                     value: `${aiData.insights.highRiskPercent.toFixed(1)}%`,
-                    color: "text-red-600",
+                    color: "text-red-700",
+                    ring: "ring-red-100/80",
+                    bg: "bg-red-50/90",
                   },
                   {
                     label: "Avg Attendance",
                     value: `${aiData.insights.avgAttendance.toFixed(1)}%`,
-                    color: "text-blue-600",
+                    color: "text-blue-700",
+                    ring: "ring-blue-100/80",
+                    bg: "bg-blue-50/90",
                   },
                   {
                     label: "Avg Marks",
                     value: `${aiData.insights.avgMarks.toFixed(1)}%`,
-                    color: "text-green-600",
+                    color: "text-emerald-700",
+                    ring: "ring-emerald-100/80",
+                    bg: "bg-emerald-50/90",
                   },
                 ].map((stat) => (
                   <div
                     key={stat.label}
-                    className="bg-white rounded-xl shadow-sm p-5"
+                    className={`rounded-2xl border border-slate-100/80 p-4 shadow-sm ring-1 sm:p-5 ${stat.ring} ${stat.bg}`}
                   >
-                    <p className="text-gray-500 text-sm">{stat.label}</p>
-                    <p className={`text-2xl font-bold mt-1 ${stat.color}`}>
+                    <p className="text-xs font-medium text-slate-600 sm:text-sm">
+                      {stat.label}
+                    </p>
+                    <p
+                      className={`mt-1 text-xl font-bold tabular-nums tracking-tight sm:text-2xl ${stat.color}`}
+                    >
                       {stat.value}
                     </p>
                   </div>
@@ -388,126 +417,139 @@ export function DataReporting() {
               </div>
 
               {/* AI Summary */}
-              <div className="bg-gradient-to-r from-red-50 to-orange-50 border border-red-200 rounded-xl p-5">
-                <div className="flex items-center gap-2 mb-3">
-                  <Brain className="w-5 h-5 text-red-600" />
-                  <h2 className="text-gray-900 font-semibold">AI Summary</h2>
+              <div className="rounded-2xl border border-red-200/80 bg-gradient-to-r from-red-50/95 to-orange-50/95 p-5 shadow-sm sm:p-6">
+                <div className="mb-3 flex items-center gap-2">
+                  <Brain className="h-5 w-5 shrink-0 text-red-600" aria-hidden />
+                  <h2 className="text-base font-semibold tracking-tight text-slate-900 sm:text-lg">
+                    AI Summary
+                  </h2>
                 </div>
-                <p className="text-gray-700 leading-relaxed">
+                <p className="text-sm leading-relaxed text-slate-700 sm:text-base">
                   {aiData.insights.aiSummary}
                 </p>
               </div>
 
               {/* Risk Distribution Chart */}
-              <div className="bg-white rounded-xl shadow-sm p-6">
-                <h2 className="text-gray-900 mb-4 flex items-center gap-2">
-                  <AlertTriangle className="w-5 h-5 text-orange-500" />
+              <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm sm:p-6">
+                <h2 className="mb-4 flex items-center gap-2 text-base font-semibold tracking-tight text-slate-900 sm:text-lg">
+                  <AlertTriangle
+                    className="h-5 w-5 shrink-0 text-orange-500"
+                    aria-hidden
+                  />
                   Risk Distribution
                 </h2>
-                <ResponsiveContainer width="100%" height={200}>
-                  <BarChart data={riskChartData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                    <XAxis
-                      dataKey="name"
-                      tick={{ fontSize: 13, fill: "#6b7280" }}
-                    />
-                    <YAxis
-                      tick={{ fontSize: 12, fill: "#6b7280" }}
-                      allowDecimals={false}
-                    />
-                    <Tooltip />
-                    <Bar dataKey="count" name="Students" radius={[6, 6, 0, 0]}>
-                      {riskChartData.map((entry, i) => (
-                        <Cell key={i} fill={entry.fill} />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
+                <div className="min-h-[200px] w-full">
+                  <ResponsiveContainer width="100%" height={200}>
+                    <BarChart data={riskChartData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                      <XAxis
+                        dataKey="name"
+                        tick={{ fontSize: 12, fill: "#64748b" }}
+                      />
+                      <YAxis
+                        tick={{ fontSize: 12, fill: "#64748b" }}
+                        allowDecimals={false}
+                      />
+                      <Tooltip />
+                      <Bar dataKey="count" name="Students" radius={[8, 8, 0, 0]}>
+                        {riskChartData.map((entry, i) => (
+                          <Cell key={i} fill={entry.fill} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
               </div>
 
               {/* Student Risk Table */}
-              <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-                <div className="p-6 border-b flex items-center gap-3">
-                  <TrendingUp className="w-6 h-6 text-red-600" />
-                  <h2 className="text-gray-900">
+              <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
+                <div className="flex items-center gap-3 border-b border-slate-100 px-4 py-4 sm:px-6 sm:py-5">
+                  <TrendingUp
+                    className="h-6 w-6 shrink-0 text-red-600"
+                    aria-hidden
+                  />
+                  <h2 className="text-base font-semibold tracking-tight text-slate-900 sm:text-lg">
                     Student Risk Details ({aiData.students.length})
                   </h2>
                 </div>
                 {aiData.students.length === 0 ? (
-                  <div className="p-8 text-center text-gray-400">
+                  <div className="px-4 py-10 text-center text-sm text-slate-500 sm:py-12">
                     No students match the selected filters.
                   </div>
                 ) : (
                   <div className="overflow-x-auto">
-                    <table className="w-full">
-                      <thead className="bg-gray-50">
+                    <table className="w-full min-w-[640px]">
+                      <thead className="bg-slate-50/90">
                         <tr>
-                          <th className="px-5 py-3 text-left text-gray-700 text-sm">
+                          <th className="px-4 py-3 text-left text-sm font-semibold text-slate-600 sm:px-5">
                             Student
                           </th>
-                          <th className="px-5 py-3 text-left text-gray-700 text-sm">
+                          <th className="px-4 py-3 text-left text-sm font-semibold text-slate-600 sm:px-5">
                             Class
                           </th>
-                          <th className="px-5 py-3 text-left text-gray-700 text-sm">
+                          <th className="px-4 py-3 text-left text-sm font-semibold text-slate-600 sm:px-5">
                             Attendance
                           </th>
-                          <th className="px-5 py-3 text-left text-gray-700 text-sm">
+                          <th className="px-4 py-3 text-left text-sm font-semibold text-slate-600 sm:px-5">
                             Marks
                           </th>
-                          <th className="px-5 py-3 text-left text-gray-700 text-sm">
+                          <th className="px-4 py-3 text-left text-sm font-semibold text-slate-600 sm:px-5">
                             Behavior
                           </th>
-                          <th className="px-5 py-3 text-left text-gray-700 text-sm">
+                          <th className="px-4 py-3 text-left text-sm font-semibold text-slate-600 sm:px-5">
                             Risk
                           </th>
-                          <th className="px-5 py-3 text-left text-gray-700 text-sm">
+                          <th className="px-4 py-3 text-left text-sm font-semibold text-slate-600 sm:px-5">
                             Key Factors
                           </th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-gray-200">
+                      <tbody className="divide-y divide-slate-100">
                         {aiData.students.map((s) => (
-                          <tr key={s.studentId} className="hover:bg-gray-50">
-                            <td className="px-5 py-3 text-gray-900 font-medium">
+                          <tr
+                            key={s.studentId}
+                            className="transition-colors hover:bg-slate-50/80"
+                          >
+                            <td className="px-4 py-3 text-sm font-semibold text-slate-900 sm:px-5">
                               {s.studentName}
-                              <span className="text-xs text-gray-500 ml-1">
+                              <span className="ml-1 text-xs font-normal text-slate-500">
                                 ({s.rollNumber})
                               </span>
                             </td>
-                            <td className="px-5 py-3 text-gray-700 text-sm">
+                            <td className="px-4 py-3 text-sm text-slate-700 sm:px-5">
                               {s.class}
                             </td>
-                            <td className="px-5 py-3 text-sm">
+                            <td className="px-4 py-3 text-sm sm:px-5">
                               <span
-                                className={`font-medium ${s.attendanceRate < 75 ? "text-red-600" : "text-green-600"}`}
+                                className={`font-semibold tabular-nums ${s.attendanceRate < 75 ? "text-red-600" : "text-emerald-600"}`}
                               >
                                 {s.attendanceRate.toFixed(1)}%
                               </span>
                             </td>
-                            <td className="px-5 py-3 text-sm">
+                            <td className="px-4 py-3 text-sm sm:px-5">
                               <span
-                                className={`font-medium ${s.averageMarks < 55 ? "text-red-600" : "text-green-600"}`}
+                                className={`font-semibold tabular-nums ${s.averageMarks < 55 ? "text-red-600" : "text-emerald-600"}`}
                               >
                                 {s.averageMarks.toFixed(1)}%
                               </span>
                             </td>
-                            <td className="px-5 py-3 text-sm text-gray-700">
+                            <td className="px-4 py-3 text-sm text-slate-700 sm:px-5">
                               {s.behaviorScore.toFixed(0)}/100
                             </td>
-                            <td className="px-5 py-3">
+                            <td className="px-4 py-3 sm:px-5">
                               <span
-                                className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
                                   s.finalRisk === "High"
-                                    ? "bg-red-100    text-red-700"
+                                    ? "border border-red-200/80 bg-red-50 text-red-800"
                                     : s.finalRisk === "Medium"
-                                      ? "bg-yellow-100 text-yellow-700"
-                                      : "bg-green-100  text-green-700"
+                                      ? "border border-amber-200/80 bg-amber-50 text-amber-900"
+                                      : "border border-emerald-200/80 bg-emerald-50 text-emerald-800"
                                 }`}
                               >
                                 {s.finalRisk}
                               </span>
                             </td>
-                            <td className="px-5 py-3 text-xs text-gray-600 max-w-xs">
+                            <td className="max-w-xs px-4 py-3 text-xs leading-relaxed text-slate-600 sm:px-5">
                               {s.factors[0]}
                             </td>
                           </tr>

@@ -885,7 +885,6 @@
 //   );
 // }
 
-//=========================Updated claude code with ugly UI========================
 import React, { useState, useEffect } from "react";
 import { Bell, Plus, Edit, Trash2, Search, X } from "lucide-react";
 import {
@@ -923,10 +922,10 @@ const CLASSES = ["Class 6", "Class 7", "Class 8", "Class 9", "Class 10"];
 
 const priorityColor = (p: string) =>
   p === "High"
-    ? "bg-red-100 text-red-700"
+    ? "border border-red-200/80 bg-red-50 text-red-800"
     : p === "Medium"
-      ? "bg-yellow-100 text-yellow-700"
-      : "bg-green-100 text-green-700";
+      ? "border border-amber-200/80 bg-amber-50 text-amber-900"
+      : "border border-emerald-200/80 bg-emerald-50 text-emerald-800";
 
 const emptyForm = {
   title: "",
@@ -1040,8 +1039,8 @@ export function ManageNoticeboard() {
   }) => (
     <>
       <div className="md:col-span-2">
-        <label className="block text-gray-700 mb-1 text-sm">
-          Title <span className="text-red-500">*</span>
+        <label className="mb-1.5 block text-sm font-semibold text-slate-700">
+          Title <span className="font-normal text-red-600">*</span>
         </label>
         <input
           type="text"
@@ -1049,12 +1048,12 @@ export function ManageNoticeboard() {
           value={data.title}
           onChange={(e) => onChange({ ...data, title: e.target.value })}
           placeholder="Notice title"
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+          className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30"
         />
       </div>
       <div className="md:col-span-2">
-        <label className="block text-gray-700 mb-1 text-sm">
-          Content <span className="text-red-500">*</span>
+        <label className="mb-1.5 block text-sm font-semibold text-slate-700">
+          Content <span className="font-normal text-red-600">*</span>
         </label>
         <textarea
           required
@@ -1062,18 +1061,18 @@ export function ManageNoticeboard() {
           value={data.content}
           onChange={(e) => onChange({ ...data, content: e.target.value })}
           placeholder="Notice content..."
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 resize-none"
+          className="w-full resize-none rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30"
         />
       </div>
-      <div>
-        <label className="block text-gray-700 mb-1 text-sm">
-          Type <span className="text-red-500">*</span>
+      <div className="space-y-1.5">
+        <label className="block text-sm font-semibold text-slate-700">
+          Type <span className="font-normal text-red-600">*</span>
         </label>
         <select
           required
           value={data.type}
           onChange={(e) => onChange({ ...data, type: e.target.value })}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+          className="w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30"
         >
           {TYPES.map((t) => (
             <option key={t} value={t}>
@@ -1082,15 +1081,15 @@ export function ManageNoticeboard() {
           ))}
         </select>
       </div>
-      <div>
-        <label className="block text-gray-700 mb-1 text-sm">
-          Priority <span className="text-red-500">*</span>
+      <div className="space-y-1.5">
+        <label className="block text-sm font-semibold text-slate-700">
+          Priority <span className="font-normal text-red-600">*</span>
         </label>
         <select
           required
           value={data.priority}
           onChange={(e) => onChange({ ...data, priority: e.target.value })}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+          className="w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30"
         >
           {PRIORITIES.map((p) => (
             <option key={p} value={p}>
@@ -1099,15 +1098,15 @@ export function ManageNoticeboard() {
           ))}
         </select>
       </div>
-      <div>
-        <label className="block text-gray-700 mb-1 text-sm">
-          Audience <span className="text-red-500">*</span>
+      <div className="space-y-1.5">
+        <label className="block text-sm font-semibold text-slate-700">
+          Audience <span className="font-normal text-red-600">*</span>
         </label>
         <select
           required
           value={data.audience}
           onChange={(e) => onChange({ ...data, audience: e.target.value })}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+          className="w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30"
         >
           {AUDIENCES.map((a) => (
             <option key={a} value={a}>
@@ -1117,15 +1116,15 @@ export function ManageNoticeboard() {
         </select>
       </div>
       {data.audience === "ClassSpecific" && (
-        <div>
-          <label className="block text-gray-700 mb-1 text-sm">
-            Target Class <span className="text-red-500">*</span>
+        <div className="space-y-1.5">
+          <label className="block text-sm font-semibold text-slate-700">
+            Target Class <span className="font-normal text-red-600">*</span>
           </label>
           <select
             required
             value={data.targetClass}
             onChange={(e) => onChange({ ...data, targetClass: e.target.value })}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+            className="w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/30"
           >
             <option value="">Select class</option>
             {CLASSES.map((c) => (
@@ -1140,50 +1139,59 @@ export function ManageNoticeboard() {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="min-w-0 space-y-6 sm:space-y-8">
       <ToastContainer toasts={toasts} />
 
-      <div className="flex justify-between items-start">
-        <div>
-          <h1 className="text-gray-900 mb-2">Manage Noticeboard</h1>
-          <p className="text-gray-600">Post and manage school notices</p>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
+        <div className="min-w-0 space-y-1">
+          <h1 className="text-balance text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+            Manage Noticeboard
+          </h1>
+          <p className="text-pretty text-sm leading-relaxed text-slate-600 sm:text-base">
+            Post and manage school notices
+          </p>
         </div>
         <button
+          type="button"
           onClick={() => setShowAddForm(!showAddForm)}
-          className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+          className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-red-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-red-600/25 transition-colors hover:bg-red-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 active:bg-red-800 sm:px-5 sm:py-3"
         >
-          <Plus className="w-4 h-4" /> Post Notice
+          <Plus className="h-4 w-4 shrink-0" aria-hidden /> Post Notice
         </button>
       </div>
 
       {showAddForm && (
-        <div className="bg-white rounded-xl shadow-sm p-6">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-gray-900">Post New Notice</h2>
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm sm:p-6">
+          <div className="mb-5 flex items-center justify-between gap-3">
+            <h2 className="text-lg font-semibold tracking-tight text-slate-900 sm:text-xl">
+              Post New Notice
+            </h2>
             <button
+              type="button"
               onClick={() => setShowAddForm(false)}
-              className="text-gray-400 hover:text-gray-600"
+              className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600"
+              aria-label="Close form"
             >
-              <X className="w-5 h-5" />
+              <X className="h-5 w-5" />
             </button>
           </div>
           <form
             onSubmit={handleAdd}
-            className="grid grid-cols-1 md:grid-cols-2 gap-4"
+            className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-5"
           >
             <NoticeForm data={newNotice} onChange={setNewNotice} />
-            <div className="md:col-span-2 flex gap-3">
+            <div className="flex flex-col gap-2 sm:col-span-2 sm:flex-row sm:gap-3">
               <button
                 type="submit"
                 disabled={loading}
-                className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
+                className="inline-flex w-full items-center justify-center rounded-xl bg-red-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-red-600/25 transition-colors hover:bg-red-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 active:bg-red-800 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
               >
                 {loading ? "Posting..." : "Post Notice"}
               </button>
               <button
                 type="button"
                 onClick={() => setShowAddForm(false)}
-                className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                className="inline-flex w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-400 active:bg-slate-100 sm:w-auto"
               >
                 Cancel
               </button>
@@ -1193,20 +1201,24 @@ export function ManageNoticeboard() {
       )}
 
       {editNotice && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-40 p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-gray-900">Edit Notice</h2>
+        <div className="fixed inset-0 z-40 flex items-end justify-center bg-slate-900/50 p-0 backdrop-blur-[2px] sm:items-center sm:p-4">
+          <div className="flex max-h-[min(100dvh,900px)] w-full max-w-lg flex-col overflow-hidden rounded-t-2xl border border-slate-200/80 bg-white shadow-2xl shadow-slate-900/15 sm:max-h-[90vh] sm:rounded-2xl">
+            <div className="flex shrink-0 items-center justify-between gap-3 border-b border-slate-100 px-4 py-4 sm:px-6 sm:py-5">
+              <h2 className="text-lg font-semibold tracking-tight text-slate-900 sm:text-xl">
+                Edit Notice
+              </h2>
               <button
+                type="button"
                 onClick={() => setEditNotice(null)}
-                className="text-gray-400 hover:text-gray-600"
+                className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600"
+                aria-label="Close dialog"
               >
-                <X className="w-5 h-5" />
+                <X className="h-5 w-5" />
               </button>
             </div>
             <form
               onSubmit={handleUpdate}
-              className="grid grid-cols-1 md:grid-cols-2 gap-4"
+              className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain p-4 md:grid md:grid-cols-2 md:gap-5 md:space-y-0 sm:p-6"
             >
               <NoticeForm
                 data={{
@@ -1219,18 +1231,18 @@ export function ManageNoticeboard() {
                 }}
                 onChange={(d) => setEditNotice({ ...editNotice, ...d })}
               />
-              <div className="md:col-span-2 flex gap-3 pt-2">
+              <div className="flex flex-col gap-2 border-t border-slate-100 bg-slate-50/50 px-0 pt-4 md:col-span-2 md:flex-row md:gap-3 md:border-0 md:bg-transparent md:px-0 md:pt-2">
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
+                  className="inline-flex w-full items-center justify-center rounded-xl bg-red-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-red-600/25 transition-colors hover:bg-red-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 active:bg-red-800 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
                 >
                   {loading ? "Saving..." : "Save Changes"}
                 </button>
                 <button
                   type="button"
                   onClick={() => setEditNotice(null)}
-                  className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                  className="inline-flex w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-400 active:bg-slate-100 sm:w-auto"
                 >
                   Cancel
                 </button>
@@ -1240,80 +1252,91 @@ export function ManageNoticeboard() {
         </div>
       )}
 
-      <div className="bg-white rounded-xl shadow-sm p-4">
+      <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm sm:p-5">
         <div className="relative">
-          <Search className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+          <Search
+            className="pointer-events-none absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400"
+            aria-hidden
+          />
           <input
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Search by title, audience or type..."
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+            className="w-full rounded-xl border border-slate-200 bg-slate-50/50 py-2.5 pl-11 pr-4 text-sm text-slate-900 shadow-inner shadow-slate-900/5 placeholder:text-slate-400 focus:border-red-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/25"
           />
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-        <div className="p-6 border-b flex items-center gap-3">
-          <Bell className="w-6 h-6 text-red-600" />
-          <h2 className="text-gray-900">Notices ({filtered.length})</h2>
+      <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
+        <div className="flex items-center gap-3 border-b border-slate-100 px-4 py-4 sm:px-6 sm:py-5">
+          <Bell className="h-6 w-6 shrink-0 text-red-600" aria-hidden />
+          <h2 className="text-base font-semibold tracking-tight text-slate-900 sm:text-lg">
+            Notices ({filtered.length})
+          </h2>
         </div>
         {fetching ? (
-          <div className="p-8 text-center text-gray-500">Loading...</div>
+          <div className="px-4 py-12 text-center text-sm font-medium text-slate-500 sm:py-14">
+            Loading...
+          </div>
         ) : filtered.length === 0 ? (
-          <div className="p-8 text-center text-gray-400">
+          <div className="px-4 py-12 text-center text-sm text-slate-500 sm:py-14">
             {searchTerm ? "No notices match." : "No notices yet."}
           </div>
         ) : (
-          <div className="divide-y divide-gray-200">
+          <div className="divide-y divide-slate-100">
             {filtered.map((n) => (
               <div
                 key={n.noticeId}
-                className="p-5 hover:bg-gray-50 flex items-start justify-between gap-4"
+                className="flex flex-col gap-4 p-4 transition-colors hover:bg-slate-50/80 sm:flex-row sm:items-start sm:justify-between sm:gap-5 sm:p-5"
               >
-                <div className="flex-1 min-w-0">
-                  <div className="flex flex-wrap items-center gap-2 mb-1">
-                    <h3 className="font-semibold text-gray-900 text-sm">
+                <div className="min-w-0 flex-1">
+                  <div className="mb-1.5 flex flex-wrap items-center gap-2">
+                    <h3 className="text-sm font-semibold leading-snug text-slate-900 sm:text-base">
                       {n.title}
                     </h3>
                     <span
-                      className={`text-xs px-2 py-0.5 rounded-full font-medium ${priorityColor(n.priority)}`}
+                      className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ${priorityColor(n.priority)}`}
                     >
                       {n.priority}
                     </span>
-                    <span className="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full">
+                    <span className="inline-flex items-center rounded-full border border-blue-200/80 bg-blue-50 px-2 py-0.5 text-xs font-semibold text-blue-800">
                       {n.type}
                     </span>
-                    <span className="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full">
+                    <span className="inline-flex items-center rounded-full border border-slate-200/80 bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-700">
                       {n.audience}
                     </span>
                     {!n.isActive && (
-                      <span className="text-xs px-2 py-0.5 bg-gray-200 text-gray-500 rounded-full">
+                      <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-200/80 px-2 py-0.5 text-xs font-semibold text-slate-600">
                         Inactive
                       </span>
                     )}
                   </div>
-                  <p className="text-gray-600 text-sm line-clamp-2">
+                  <p className="line-clamp-2 text-sm leading-relaxed text-slate-600">
                     {n.content}
                   </p>
-                  <p className="text-gray-400 text-xs mt-1">
+                  <p className="mt-2 text-xs font-medium text-slate-500">
                     Posted by {n.postedBy.username} ·{" "}
                     {new Date(n.postedAt).toLocaleDateString()}
                     {n.targetClass && ` · ${n.targetClass}`}
                   </p>
                 </div>
-                <div className="flex gap-2 flex-shrink-0">
+                <div className="flex shrink-0 gap-1 sm:flex-col sm:gap-2 md:flex-row">
                   <button
+                    type="button"
                     onClick={() => setEditNotice(n)}
-                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"
+                    className="rounded-xl p-2.5 text-blue-700 transition-colors hover:bg-blue-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 active:bg-blue-100/60"
+                    aria-label="Edit notice"
                   >
-                    <Edit className="w-4 h-4" />
+                    <Edit className="h-4 w-4" />
                   </button>
                   <button
+                    type="button"
                     onClick={() => handleDelete(n.noticeId)}
-                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
+                    className="rounded-xl p-2.5 text-red-700 transition-colors hover:bg-red-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 active:bg-red-100/60"
+                    aria-label="Delete notice"
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <Trash2 className="h-4 w-4" />
                   </button>
                 </div>
               </div>
