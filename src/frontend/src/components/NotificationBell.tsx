@@ -19,28 +19,44 @@ import {
 const typeIcon = (type: string) => {
   switch (type.toLowerCase()) {
     case "riskalert":
-      return <AlertTriangle className="w-4 h-4 text-red-500 flex-shrink-0" />;
+      return (
+        <AlertTriangle
+          className="h-4 w-4 shrink-0 text-red-600"
+          aria-hidden
+        />
+      );
     case "fee":
-      return <DollarSign className="w-4 h-4 text-orange-500 flex-shrink-0" />;
+      return (
+        <DollarSign
+          className="h-4 w-4 shrink-0 text-orange-600"
+          aria-hidden
+        />
+      );
     case "marks":
-      return <BookOpen className="w-4 h-4 text-blue-500 flex-shrink-0" />;
+      return (
+        <BookOpen className="h-4 w-4 shrink-0 text-blue-600" aria-hidden />
+      );
     case "attendance":
-      return <BookOpen className="w-4 h-4 text-green-500 flex-shrink-0" />;
+      return (
+        <BookOpen className="h-4 w-4 shrink-0 text-emerald-600" aria-hidden />
+      );
     default:
-      return <Info className="w-4 h-4 text-gray-400 flex-shrink-0" />;
+      return (
+        <Info className="h-4 w-4 shrink-0 text-slate-400" aria-hidden />
+      );
   }
 };
 
 const typeColor = (type: string) => {
   switch (type.toLowerCase()) {
     case "riskalert":
-      return "border-l-red-400 bg-red-50";
+      return "border-l-red-500 bg-red-50/90";
     case "fee":
-      return "border-l-orange-400 bg-orange-50";
+      return "border-l-orange-500 bg-orange-50/90";
     case "marks":
-      return "border-l-blue-400 bg-blue-50";
+      return "border-l-blue-500 bg-blue-50/90";
     default:
-      return "border-l-gray-300 bg-gray-50";
+      return "border-l-slate-300 bg-slate-50/90";
   }
 };
 
@@ -118,15 +134,18 @@ export function NotificationBell({
     <div className="relative" ref={panelRef}>
       {/* Bell button */}
       <button
+        type="button"
         onClick={() => setOpen((prev) => !prev)}
-        className="relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+        className="relative rounded-xl p-2.5 text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-600 active:bg-slate-200/80"
         title="Notifications"
+        aria-expanded={open}
+        aria-haspopup="true"
       >
-        <Bell className="w-5 h-5" />
+        <Bell className="h-5 w-5" aria-hidden />
 
         {/* Unread badge */}
         {unreadCount > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-600 text-white text-xs font-bold rounded-full flex items-center justify-center leading-none">
+          <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-red-600 px-1 text-[10px] font-bold leading-none text-white shadow-sm ring-2 ring-white">
             {unreadCount > 9 ? "9+" : unreadCount}
           </span>
         )}
@@ -135,49 +154,56 @@ export function NotificationBell({
       {/* Dropdown panel */}
       {open && (
         <div
-          className="absolute right-0 top-10 w-80 bg-white rounded-xl shadow-2xl border border-gray-200 z-50 flex flex-col"
-          style={{ maxHeight: "420px" }}
+          className="absolute right-0 top-full z-50 mt-2 flex max-h-[420px] w-[min(20rem,calc(100vw-1.5rem))] flex-col overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-2xl shadow-slate-900/15 sm:w-80"
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
-            <div className="flex items-center gap-2">
-              <Bell className="w-4 h-4 text-red-600" />
-              <span className="font-semibold text-gray-900 text-sm">
+          <div className="flex shrink-0 items-center justify-between gap-2 border-b border-slate-100 bg-white px-3 py-3 sm:px-4">
+            <div className="flex min-w-0 items-center gap-2">
+              <Bell className="h-4 w-4 shrink-0 text-purple-600" aria-hidden />
+              <span className="truncate text-sm font-semibold tracking-tight text-slate-900">
                 Notifications
               </span>
               {unreadCount > 0 && (
-                <span className="bg-red-100 text-red-700 text-xs px-1.5 py-0.5 rounded-full font-medium">
+                <span className="shrink-0 rounded-full bg-red-100 px-2 py-0.5 text-xs font-semibold text-red-800">
                   {unreadCount} new
                 </span>
               )}
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex shrink-0 items-center gap-0.5">
               {unreadCount > 0 && (
                 <button
+                  type="button"
                   onClick={handleMarkAllRead}
                   disabled={loading}
-                  className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1 px-2 py-1 rounded hover:bg-blue-50"
+                  className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-purple-700 transition-colors hover:bg-purple-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-600 disabled:cursor-not-allowed disabled:opacity-50"
                   title="Mark all as read"
                 >
-                  <CheckCheck className="w-3.5 h-3.5" />
+                  <CheckCheck className="h-3.5 w-3.5 shrink-0" aria-hidden />
                   All read
                 </button>
               )}
               <button
+                type="button"
                 onClick={() => setOpen(false)}
-                className="p-1 text-gray-400 hover:text-gray-600 rounded"
+                className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-400"
+                aria-label="Close notifications"
               >
-                <X className="w-4 h-4" />
+                <X className="h-4 w-4" />
               </button>
             </div>
           </div>
 
           {/* List */}
-          <div className="flex-1 overflow-y-auto divide-y divide-gray-100">
+          <div className="min-h-0 flex-1 divide-y divide-slate-100 overflow-y-auto overscroll-contain">
             {notifications.length === 0 ? (
-              <div className="p-6 text-center text-gray-400 text-sm">
-                <Bell className="w-8 h-8 mx-auto mb-2 text-gray-300" />
-                No notifications yet
+              <div className="px-4 py-10 text-center sm:py-12">
+                <Bell
+                  className="mx-auto mb-3 h-9 w-9 text-slate-200"
+                  aria-hidden
+                />
+                <p className="text-sm font-medium text-slate-500">
+                  No notifications yet
+                </p>
               </div>
             ) : (
               notifications.slice(0, 20).map((n) => (
@@ -186,25 +212,25 @@ export function NotificationBell({
                   onClick={() =>
                     n.status === "Unread" && handleMarkRead(n.notificationId)
                   }
-                  className={`flex gap-3 px-4 py-3 border-l-4 cursor-pointer hover:brightness-95 transition-all ${typeColor(
+                  className={`flex cursor-pointer gap-3 border-l-4 px-3 py-3 transition-all hover:brightness-[0.98] active:brightness-95 sm:px-4 ${typeColor(
                     n.type,
                   )} ${n.status === "Unread" ? "opacity-100" : "opacity-60"}`}
                 >
                   {/* Type icon */}
-                  <div className="mt-0.5">{typeIcon(n.type)}</div>
+                  <div className="mt-0.5 shrink-0">{typeIcon(n.type)}</div>
 
                   {/* Content */}
-                  <div className="flex-1 min-w-0">
+                  <div className="min-w-0 flex-1">
                     <p
                       className={`text-xs leading-relaxed ${
                         n.status === "Unread"
-                          ? "text-gray-900 font-medium"
-                          : "text-gray-600"
+                          ? "font-medium text-slate-900"
+                          : "text-slate-600"
                       }`}
                     >
                       {n.content}
                     </p>
-                    <p className="text-xs text-gray-400 mt-1">
+                    <p className="mt-1 text-[11px] font-medium text-slate-400 sm:text-xs">
                       {new Date(n.dateSent).toLocaleString(undefined, {
                         month: "short",
                         day: "numeric",
@@ -216,7 +242,7 @@ export function NotificationBell({
 
                   {/* Unread dot */}
                   {n.status === "Unread" && (
-                    <div className="w-2 h-2 rounded-full bg-red-500 mt-1.5 flex-shrink-0" />
+                    <div className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-red-500 ring-2 ring-white" />
                   )}
                 </div>
               ))
@@ -225,8 +251,8 @@ export function NotificationBell({
 
           {/* Footer */}
           {notifications.length > 0 && (
-            <div className="px-4 py-2 border-t border-gray-100 text-center">
-              <p className="text-xs text-gray-400">
+            <div className="shrink-0 border-t border-slate-100 bg-slate-50/50 px-3 py-2.5 text-center sm:px-4">
+              <p className="text-[11px] font-medium text-slate-500 sm:text-xs">
                 Showing {Math.min(notifications.length, 20)} of{" "}
                 {notifications.length} notifications
               </p>

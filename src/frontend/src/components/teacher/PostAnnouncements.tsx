@@ -1,6 +1,3 @@
-// FILE: src/components/teacher/PostAnnouncements.tsx
-// ACTION: REPLACE existing file entirely
-
 import React, { useEffect, useState } from "react";
 import {
   Bell,
@@ -46,18 +43,18 @@ const PRIORITY_OPTIONS = [
 ];
 
 const PRIORITY_COLORS: Record<string, string> = {
-  Low: "bg-gray-100 text-gray-600",
-  Medium: "bg-blue-100 text-blue-700",
-  High: "bg-orange-100 text-orange-700",
-  Urgent: "bg-red-100 text-red-700",
+  Low: "border border-slate-200/90 bg-slate-100 text-slate-800",
+  Medium: "border border-blue-200/80 bg-blue-50 text-blue-800",
+  High: "border border-orange-200/80 bg-orange-50 text-orange-800",
+  Urgent: "border border-red-200/80 bg-red-50 text-red-800",
 };
 
 const TYPE_COLORS: Record<string, string> = {
-  Academic: "bg-purple-100 text-purple-700",
-  Event: "bg-pink-100 text-pink-700",
-  Holiday: "bg-green-100 text-green-700",
-  Exam: "bg-yellow-100 text-yellow-700",
-  General: "bg-gray-100 text-gray-700",
+  Academic: "border border-purple-200/80 bg-purple-50 text-purple-800",
+  Event: "border border-pink-200/80 bg-pink-50 text-pink-800",
+  Holiday: "border border-emerald-200/80 bg-emerald-50 text-emerald-800",
+  Exam: "border border-amber-200/80 bg-amber-50 text-amber-900",
+  General: "border border-slate-200/80 bg-slate-100 text-slate-800",
 };
 
 function labelFor<T extends { label: string; value: number }>(
@@ -161,113 +158,158 @@ export function PostAnnouncements() {
   const inactiveNotices = notices.filter((n) => !n.isActive);
 
   return (
-    <div className="space-y-6">
+    <div className="min-w-0 space-y-8 sm:space-y-10">
       {/* Header */}
-      <div className="flex items-center justify-between flex-wrap gap-4">
-        <div>
-          <h1 className="text-gray-900 font-bold text-2xl mb-1">
+      <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between sm:gap-8">
+        <div className="min-w-0 space-y-2">
+          <h1 className="text-balance text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
             Post Announcements
           </h1>
-          <p className="text-gray-600">
+          <p className="max-w-2xl text-pretty text-sm leading-relaxed text-slate-600 sm:text-base">
             Publish notices and announcements for students or parents
           </p>
         </div>
         <button
+          type="button"
           onClick={() => {
             setShowForm(true);
             setError(null);
             setSuccessMsg(null);
           }}
-          className="flex items-center gap-2 px-5 py-2.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium"
+          className="inline-flex shrink-0 items-center justify-center gap-2.5 rounded-xl bg-purple-600 px-5 py-3 text-sm font-semibold text-white shadow-sm shadow-purple-600/25 transition-colors hover:bg-purple-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-600 active:bg-purple-800 sm:px-6 sm:py-3.5"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="h-4 w-4 shrink-0" aria-hidden />
           New Announcement
         </button>
       </div>
 
       {/* Feedback */}
       {error && (
-        <div className="flex items-center gap-3 bg-red-50 border border-red-200 rounded-xl p-4 text-red-700">
-          <AlertTriangle className="w-5 h-5 flex-shrink-0" />
-          <p className="text-sm flex-1">{error}</p>
-          <button onClick={() => setError(null)}>
-            <X className="w-4 h-4" />
+        <div
+          className="flex items-start gap-4 rounded-2xl border border-red-200/90 bg-red-50/90 p-5 text-red-800 shadow-sm sm:items-center sm:p-5"
+          role="alert"
+        >
+          <AlertTriangle
+            className="mt-0.5 h-5 w-5 shrink-0 text-red-600 sm:mt-0"
+            aria-hidden
+          />
+          <p className="min-w-0 flex-1 text-sm font-medium leading-relaxed">
+            {error}
+          </p>
+          <button
+            type="button"
+            onClick={() => setError(null)}
+            className="shrink-0 rounded-lg p-2 text-red-600 transition-colors hover:bg-red-100/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600"
+            aria-label="Dismiss error"
+          >
+            <X className="h-4 w-4" />
           </button>
         </div>
       )}
       {successMsg && (
-        <div className="flex items-center gap-3 bg-green-50 border border-green-200 rounded-xl p-4 text-green-700">
-          <CheckCircle className="w-5 h-5 flex-shrink-0" />
-          <p className="text-sm flex-1">{successMsg}</p>
-          <button onClick={() => setSuccessMsg(null)}>
-            <X className="w-4 h-4" />
+        <div
+          className="flex items-start gap-4 rounded-2xl border border-emerald-200/90 bg-emerald-50/90 p-5 text-emerald-900 shadow-sm sm:items-center sm:p-5"
+          role="status"
+        >
+          <CheckCircle
+            className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600 sm:mt-0"
+            aria-hidden
+          />
+          <p className="min-w-0 flex-1 text-sm font-medium leading-relaxed">
+            {successMsg}
+          </p>
+          <button
+            type="button"
+            onClick={() => setSuccessMsg(null)}
+            className="shrink-0 rounded-lg p-2 text-emerald-700 transition-colors hover:bg-emerald-100/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600"
+            aria-label="Dismiss message"
+          >
+            <X className="h-4 w-4" />
           </button>
         </div>
       )}
 
       {/* Summary */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-5">
         {[
           {
             label: "Total Notices",
             value: notices.length,
-            bg: "bg-purple-50",
-            color: "text-purple-600",
+            bg: "bg-purple-50/90",
+            color: "text-purple-700",
+            ring: "ring-purple-100/80",
           },
           {
             label: "Active",
             value: activeNotices.length,
-            bg: "bg-green-50",
-            color: "text-green-600",
+            bg: "bg-emerald-50/90",
+            color: "text-emerald-700",
+            ring: "ring-emerald-100/80",
           },
           {
             label: "Inactive",
             value: inactiveNotices.length,
-            bg: "bg-gray-50",
-            color: "text-gray-600",
+            bg: "bg-slate-50/90",
+            color: "text-slate-700",
+            ring: "ring-slate-200/80",
           },
           {
             label: "Urgent",
             value: notices.filter(
               (n) => labelFor(PRIORITY_OPTIONS, n.priority) === "Urgent",
             ).length,
-            bg: "bg-red-50",
-            color: "text-red-600",
+            bg: "bg-red-50/90",
+            color: "text-red-700",
+            ring: "ring-red-100/80",
           },
-        ].map(({ label, value, bg, color }) => (
-          <div key={label} className={`${bg} rounded-xl p-4`}>
-            <p className={`text-2xl font-bold ${color}`}>{value}</p>
-            <p className="text-gray-600 text-sm">{label}</p>
+        ].map(({ label, value, bg, color, ring }) => (
+          <div
+            key={label}
+            className={`rounded-2xl border border-slate-100/80 p-5 shadow-sm ring-1 sm:p-6 ${ring} ${bg}`}
+          >
+            <p
+              className={`text-2xl font-bold tabular-nums tracking-tight sm:text-3xl ${color}`}
+            >
+              {value}
+            </p>
+            <p className="mt-2 text-xs font-medium text-slate-600 sm:text-sm">
+              {label}
+            </p>
           </div>
         ))}
       </div>
 
       {/* Post Form Modal */}
       {showForm && (
-        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between p-6 border-b sticky top-0 bg-white z-10">
-              <h2 className="text-gray-900 font-semibold text-lg flex items-center gap-2">
-                <Megaphone className="w-5 h-5 text-purple-600" />
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/50 p-0 backdrop-blur-[2px] sm:items-center sm:p-6">
+          <div className="flex max-h-[min(100dvh,900px)] w-full max-w-xl flex-col overflow-hidden rounded-t-2xl border border-slate-200/80 bg-white shadow-2xl shadow-slate-900/15 sm:max-h-[90vh] sm:rounded-2xl">
+            <div className="sticky top-0 z-10 flex shrink-0 items-center justify-between gap-4 border-b border-slate-100 bg-white/95 px-5 py-5 backdrop-blur-sm sm:px-8 sm:py-6">
+              <h2 className="flex items-center gap-3 text-lg font-semibold tracking-tight text-slate-900 sm:text-xl">
+                <Megaphone
+                  className="h-5 w-5 shrink-0 text-purple-600 sm:h-6 sm:w-6"
+                  aria-hidden
+                />
                 New Announcement
               </h2>
               <button
+                type="button"
                 onClick={() => {
                   setShowForm(false);
                   setForm(EMPTY_FORM);
                   setError(null);
                 }}
-                className="text-gray-400 hover:text-gray-700 transition-colors"
+                className="shrink-0 rounded-xl p-2.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-600"
+                aria-label="Close dialog"
               >
-                <X className="w-5 h-5" />
+                <X className="h-5 w-5" />
               </button>
             </div>
 
-            <div className="p-6 space-y-4">
+            <div className="min-h-0 flex-1 space-y-6 overflow-y-auto overscroll-contain px-5 py-7 sm:px-8 sm:py-8">
               {/* Title */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Title <span className="text-red-500">*</span>
+              <div className="space-y-2">
+                <label className="block text-sm font-semibold text-slate-700">
+                  Title <span className="font-normal text-red-600">*</span>
                 </label>
                 <input
                   type="text"
@@ -276,18 +318,18 @@ export function PostAnnouncements() {
                     setForm((f) => ({ ...f, title: e.target.value }))
                   }
                   placeholder="e.g., School Annual Day – Save the Date"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/30 sm:px-5 sm:py-3.5"
                   maxLength={200}
                 />
-                <p className="text-xs text-gray-400 mt-0.5 text-right">
+                <p className="text-right text-xs text-slate-500">
                   {form.title.length}/200
                 </p>
               </div>
 
               {/* Content */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Content <span className="text-red-500">*</span>
+              <div className="space-y-2">
+                <label className="block text-sm font-semibold text-slate-700">
+                  Content <span className="font-normal text-red-600">*</span>
                 </label>
                 <textarea
                   rows={5}
@@ -296,14 +338,14 @@ export function PostAnnouncements() {
                     setForm((f) => ({ ...f, content: e.target.value }))
                   }
                   placeholder="Write the full announcement here…"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"
+                  className="w-full resize-none rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/30 sm:px-5 sm:py-4"
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6">
                 {/* Audience */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                <div className="space-y-2">
+                  <label className="block text-sm font-semibold text-slate-700">
                     Audience
                   </label>
                   <select
@@ -314,7 +356,7 @@ export function PostAnnouncements() {
                         audience: Number(e.target.value),
                       }))
                     }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/30 sm:px-5 sm:py-3.5"
                   >
                     {AUDIENCE_OPTIONS.map((o) => (
                       <option key={o.value} value={o.value}>
@@ -325,8 +367,8 @@ export function PostAnnouncements() {
                 </div>
 
                 {/* Type */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                <div className="space-y-2">
+                  <label className="block text-sm font-semibold text-slate-700">
                     Type
                   </label>
                   <select
@@ -334,7 +376,7 @@ export function PostAnnouncements() {
                     onChange={(e) =>
                       setForm((f) => ({ ...f, type: Number(e.target.value) }))
                     }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/30 sm:px-5 sm:py-3.5"
                   >
                     {TYPE_OPTIONS.map((o) => (
                       <option key={o.value} value={o.value}>
@@ -345,8 +387,8 @@ export function PostAnnouncements() {
                 </div>
 
                 {/* Priority */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                <div className="space-y-2">
+                  <label className="block text-sm font-semibold text-slate-700">
                     Priority
                   </label>
                   <select
@@ -357,7 +399,7 @@ export function PostAnnouncements() {
                         priority: Number(e.target.value),
                       }))
                     }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/30 sm:px-5 sm:py-3.5"
                   >
                     {PRIORITY_OPTIONS.map((o) => (
                       <option key={o.value} value={o.value}>
@@ -369,9 +411,10 @@ export function PostAnnouncements() {
 
                 {/* Target Class (conditional) */}
                 {form.audience === 3 && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Target Class <span className="text-red-500">*</span>
+                  <div className="space-y-2">
+                    <label className="block text-sm font-semibold text-slate-700">
+                      Target Class{" "}
+                      <span className="font-normal text-red-600">*</span>
                     </label>
                     <input
                       type="text"
@@ -380,31 +423,33 @@ export function PostAnnouncements() {
                         setForm((f) => ({ ...f, targetClass: e.target.value }))
                       }
                       placeholder="e.g., Grade 10-A"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/30 sm:px-5 sm:py-3.5"
                     />
                   </div>
                 )}
               </div>
 
               {/* Preview */}
-              <div className="bg-gray-50 rounded-lg p-4 text-sm">
-                <p className="font-medium text-gray-700 mb-2">Preview:</p>
-                <div className="flex flex-wrap gap-2">
+              <div className="rounded-2xl border border-slate-200/80 bg-slate-50/90 p-5 shadow-inner shadow-slate-900/5 sm:p-6">
+                <p className="mb-4 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  Preview
+                </p>
+                <div className="flex flex-wrap gap-2.5">
                   <span
-                    className={`px-2 py-0.5 rounded-full text-xs font-semibold ${TYPE_COLORS[labelFor(TYPE_OPTIONS, form.type)] ?? ""}`}
+                    className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${TYPE_COLORS[labelFor(TYPE_OPTIONS, form.type)] ?? ""}`}
                   >
                     {labelFor(TYPE_OPTIONS, form.type)}
                   </span>
                   <span
-                    className={`px-2 py-0.5 rounded-full text-xs font-semibold ${PRIORITY_COLORS[labelFor(PRIORITY_OPTIONS, form.priority)] ?? ""}`}
+                    className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${PRIORITY_COLORS[labelFor(PRIORITY_OPTIONS, form.priority)] ?? ""}`}
                   >
                     {labelFor(PRIORITY_OPTIONS, form.priority)}
                   </span>
-                  <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">
+                  <span className="inline-flex items-center rounded-full border border-blue-200/80 bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-800">
                     {labelFor(AUDIENCE_OPTIONS, form.audience)}
                   </span>
                   {form.audience === 3 && form.targetClass && (
-                    <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-teal-100 text-teal-700">
+                    <span className="inline-flex items-center rounded-full border border-teal-200/80 bg-teal-50 px-3 py-1 text-xs font-semibold text-teal-800">
                       {form.targetClass}
                     </span>
                   )}
@@ -412,30 +457,32 @@ export function PostAnnouncements() {
               </div>
             </div>
 
-            <div className="p-6 border-t flex justify-end gap-3 sticky bottom-0 bg-white">
+            <div className="flex shrink-0 flex-col-reverse gap-3 border-t border-slate-100 bg-slate-50/50 px-5 py-5 sm:flex-row sm:justify-end sm:gap-4 sm:px-8 sm:py-6">
               <button
+                type="button"
                 onClick={() => {
                   setShowForm(false);
                   setForm(EMPTY_FORM);
                   setError(null);
                 }}
-                className="px-5 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                className="inline-flex w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-400 active:bg-slate-100 sm:w-auto sm:px-6 sm:py-3.5"
               >
                 Cancel
               </button>
               <button
+                type="button"
                 onClick={handleSubmit}
                 disabled={submitting}
-                className="flex items-center gap-2 px-5 py-2.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-60 disabled:cursor-not-allowed font-medium"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-purple-600 px-5 py-3 text-sm font-semibold text-white shadow-sm shadow-purple-600/25 transition-colors hover:bg-purple-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-600 active:bg-purple-800 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:px-6 sm:py-3.5"
               >
                 {submitting ? (
                   <>
-                    <RefreshCw className="w-4 h-4 animate-spin" />
+                    <RefreshCw className="h-4 w-4 shrink-0 animate-spin" />
                     Posting…
                   </>
                 ) : (
                   <>
-                    <Bell className="w-4 h-4" />
+                    <Bell className="h-4 w-4 shrink-0" />
                     Post Announcement
                   </>
                 )}
@@ -447,30 +494,37 @@ export function PostAnnouncements() {
 
       {/* Notices List */}
       {loading ? (
-        <div className="space-y-3">
+        <div className="space-y-4 sm:space-y-5">
           {[...Array(3)].map((_, i) => (
             <div
               key={i}
-              className="bg-white rounded-xl shadow-sm p-6 h-28 animate-pulse"
+              className="h-32 animate-pulse rounded-2xl border border-slate-100 bg-slate-100/80 sm:h-36"
             />
           ))}
         </div>
       ) : notices.length === 0 ? (
-        <div className="bg-white rounded-xl shadow-sm p-16 text-center text-gray-400">
-          <Bell className="w-12 h-12 mx-auto mb-4 opacity-40" />
-          <p className="text-lg font-medium">No announcements yet</p>
-          <p className="text-sm mt-1">Click 'New Announcement' to post one.</p>
+        <div className="rounded-2xl border border-dashed border-slate-200 bg-white px-6 py-16 text-center shadow-sm sm:px-10 sm:py-20">
+          <Bell
+            className="mx-auto mb-5 h-12 w-12 text-slate-300"
+            aria-hidden
+          />
+          <p className="text-base font-semibold text-slate-700 sm:text-lg">
+            No announcements yet
+          </p>
+          <p className="mt-3 text-sm leading-relaxed text-slate-500">
+            Click 'New Announcement' to post one.
+          </p>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-8 sm:space-y-10">
           {/* Active */}
           {activeNotices.length > 0 && (
-            <section>
-              <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
-                <Eye className="w-4 h-4" /> Active Notices (
-                {activeNotices.length})
+            <section className="min-w-0">
+              <h2 className="mb-4 flex items-center gap-2.5 text-xs font-semibold uppercase tracking-wider text-slate-500 sm:mb-5 sm:text-sm">
+                <Eye className="h-4 w-4 shrink-0" aria-hidden /> Active Notices
+                ({activeNotices.length})
               </h2>
-              <div className="space-y-3">
+              <div className="space-y-4 sm:space-y-5">
                 {activeNotices.map((n) => (
                   <NoticeCard
                     key={n.noticeId}
@@ -485,12 +539,12 @@ export function PostAnnouncements() {
 
           {/* Inactive */}
           {inactiveNotices.length > 0 && (
-            <section>
-              <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
-                <EyeOff className="w-4 h-4" /> Inactive Notices (
-                {inactiveNotices.length})
+            <section className="min-w-0">
+              <h2 className="mb-4 flex items-center gap-2.5 text-xs font-semibold uppercase tracking-wider text-slate-500 sm:mb-5 sm:text-sm">
+                <EyeOff className="h-4 w-4 shrink-0" aria-hidden /> Inactive
+                Notices ({inactiveNotices.length})
               </h2>
-              <div className="space-y-3 opacity-60">
+              <div className="space-y-4 opacity-60 sm:space-y-5">
                 {inactiveNotices.map((n) => (
                   <NoticeCard
                     key={n.noticeId}
@@ -540,33 +594,37 @@ function NoticeCard({
     String(notice.audience);
 
   return (
-    <div className="bg-white rounded-xl shadow-sm p-5 flex flex-col sm:flex-row gap-4">
-      <div className="flex-1 min-w-0">
-        <div className="flex flex-wrap gap-2 mb-2">
+    <div className="flex flex-col gap-6 rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm transition-shadow hover:border-slate-300 hover:shadow-md sm:flex-row sm:items-start sm:gap-8 sm:p-7 lg:p-8">
+      <div className="min-w-0 flex-1">
+        <div className="mb-4 flex flex-wrap gap-2.5 sm:mb-5">
           <span
-            className={`px-2 py-0.5 rounded-full text-xs font-semibold ${TYPE_COLORS[typeLabel] ?? "bg-gray-100 text-gray-700"}`}
+            className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${TYPE_COLORS[typeLabel] ?? "border border-slate-200 bg-slate-100 text-slate-800"}`}
           >
             {typeLabel}
           </span>
           <span
-            className={`px-2 py-0.5 rounded-full text-xs font-semibold ${PRIORITY_COLORS[priorityLabel] ?? "bg-gray-100 text-gray-700"}`}
+            className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${PRIORITY_COLORS[priorityLabel] ?? "border border-slate-200 bg-slate-100 text-slate-800"}`}
           >
             {priorityLabel}
           </span>
-          <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">
+          <span className="inline-flex items-center rounded-full border border-blue-200/80 bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-800">
             {audienceLabel}
           </span>
           {notice.targetClass && (
-            <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-teal-100 text-teal-700">
+            <span className="inline-flex items-center rounded-full border border-teal-200/80 bg-teal-50 px-3 py-1 text-xs font-semibold text-teal-800">
               {notice.targetClass}
             </span>
           )}
         </div>
 
-        <h3 className="font-semibold text-gray-900 mb-1">{notice.title}</h3>
-        <p className="text-sm text-gray-600 line-clamp-2">{notice.content}</p>
+        <h3 className="mb-2 text-base font-semibold leading-snug tracking-tight text-slate-900 sm:text-lg">
+          {notice.title}
+        </h3>
+        <p className="line-clamp-2 text-sm leading-relaxed text-slate-600 sm:text-[0.9375rem]">
+          {notice.content}
+        </p>
 
-        <div className="mt-2 flex gap-4 text-xs text-gray-400">
+        <div className="mt-5 flex flex-col gap-2 text-xs font-medium text-slate-500 sm:mt-6 sm:flex-row sm:flex-wrap sm:gap-x-8 sm:gap-y-2 sm:text-sm">
           <span>
             📅{" "}
             {new Date(notice.postedAt).toLocaleDateString("en-PK", {
@@ -583,17 +641,18 @@ function NoticeCard({
       </div>
 
       {!isInactive && (
-        <div className="flex items-start">
+        <div className="flex shrink-0 items-stretch sm:items-start sm:pt-1">
           <button
+            type="button"
             onClick={() => onDeactivate(notice.noticeId, notice.title)}
             disabled={deactivatingId === notice.noticeId}
-            className="flex items-center gap-1.5 px-3 py-1.5 border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50 hover:border-gray-400 text-sm transition-colors disabled:opacity-40"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-600 shadow-sm transition-colors hover:border-slate-300 hover:bg-slate-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-400 active:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto sm:px-5"
             title="Deactivate notice"
           >
             {deactivatingId === notice.noticeId ? (
-              <RefreshCw className="w-4 h-4 animate-spin" />
+              <RefreshCw className="h-4 w-4 shrink-0 animate-spin" />
             ) : (
-              <EyeOff className="w-4 h-4" />
+              <EyeOff className="h-4 w-4 shrink-0" />
             )}
             Deactivate
           </button>
