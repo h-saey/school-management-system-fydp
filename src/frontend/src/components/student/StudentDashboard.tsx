@@ -14,9 +14,10 @@ import { ViewAttendance } from "./ViewAttendance";
 import { ViewMarks } from "./ViewMarks";
 import { StudentPortfolio } from "./StudentPortfolio";
 import { ComplaintSubmission } from "./ComplaintSubmission";
-import { Notifications } from "./Notifications";
+//import { Notifications } from "./Notifications";
 import { FeeStatus } from "./FeeStatus";
 import { ResponsiveDashboard } from "../ResponsiveDashboard";
+import { DigitalNoticeboard } from "./DigitalNoticeboard";
 
 // interface User {
 //   id: number;
@@ -36,8 +37,9 @@ type Page =
   | "marks"
   | "portfolio"
   | "complaints"
-  | "notifications"
-  | "fees";
+  // | "notifications"
+  | "fees"
+  | "noticeboard";
 
 export function StudentDashboard({ user, onLogout }: StudentDashboardProps) {
   const [currentPage, setCurrentPage] = useState<Page>("dashboard");
@@ -49,7 +51,8 @@ export function StudentDashboard({ user, onLogout }: StudentDashboardProps) {
     { id: "fees" as Page, label: "Fees", icon: DollarSign },
     { id: "portfolio" as Page, label: "Portfolio", icon: Award },
     { id: "complaints" as Page, label: "Complaints", icon: MessageSquare },
-    { id: "notifications" as Page, label: "Notifications", icon: Bell },
+    // { id: "notifications" as Page, label: "Notifications", icon: Bell },
+    { id: "noticeboard" as Page, label: "Noticeboard", icon: FileText },
   ];
 
   return (
@@ -68,7 +71,8 @@ export function StudentDashboard({ user, onLogout }: StudentDashboardProps) {
       {currentPage === "fees" && <FeeStatus />}
       {currentPage === "portfolio" && <StudentPortfolio />}
       {currentPage === "complaints" && <ComplaintSubmission />}
-      {currentPage === "notifications" && <Notifications />}
+      {/* {currentPage === "notifications" && <Notifications />} */}
+      {currentPage === "noticeboard" && <DigitalNoticeboard />}
     </ResponsiveDashboard>
   );
 }

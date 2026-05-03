@@ -386,13 +386,13 @@ export const deleteAttendance = (id: number) =>
 // ══════════════════════════════════════════════════════════════
 // MARKS
 // ══════════════════════════════════════════════════════════════
-export const getMarks = () => request<any[]>(`${API_BASE}/marks`);
+export const getMarks = () => request<any[]>(`${API_BASE}/mark`);
 export const updateMarks = (
   id: number,
   marksObtained: number,
   totalMarks?: number,
 ) =>
-  request<any>(`${API_BASE}/marks/${id}`, {
+  request<any>(`${API_BASE}/mark/${id}`, {
     method: "PUT",
     body: JSON.stringify({
       marksObtained,
@@ -400,7 +400,7 @@ export const updateMarks = (
     }),
   });
 export const deleteMarks = (id: number) =>
-  request<any>(`${API_BASE}/marks/${id}`, { method: "DELETE" });
+  request<any>(`${API_BASE}/mark/${id}`, { method: "DELETE" });
 
 // ══════════════════════════════════════════════════════════════
 // FEES

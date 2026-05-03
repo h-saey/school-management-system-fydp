@@ -3,6 +3,7 @@ import React, { useState, ReactNode } from "react";
 import { User } from "../App";
 import { LogOut, Menu, X } from "lucide-react";
 import { SEO } from "./SEO";
+import { NotificationBell } from "./NotificationBell";
 
 interface MenuItem {
   id: string;
@@ -80,7 +81,22 @@ export function ResponsiveDashboard({
             {subtitle && <p className="text-xs text-gray-500">{subtitle}</p>}
           </div>
         </div>
-        <button
+        <div className="flex items-center gap-2">
+          <NotificationBell pollIntervalMs={30000} />
+
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
+          >
+            {isMobileMenuOpen ? (
+              <X className="w-6 h-6 text-gray-700" />
+            ) : (
+              <Menu className="w-6 h-6 text-gray-700" />
+            )}
+          </button>
+        </div>
+        {/* <button
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
           aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
@@ -90,7 +106,7 @@ export function ResponsiveDashboard({
           ) : (
             <Menu className="w-6 h-6 text-gray-700" />
           )}
-        </button>
+        </button> */}
       </div>
 
       {/* Sidebar - Desktop */}
@@ -208,7 +224,21 @@ export function ResponsiveDashboard({
 
       {/* Main Content */}
       <div className="flex-1 overflow-y-auto pt-16 lg:pt-0">
-        <div className="p-4 sm:p-6 lg:p-8">{children}</div>
+        <div className="p-4 sm:p-6 lg:p-8">
+          {/* Desktop Header */}
+          <div className="hidden lg:flex items-center justify-between mb-6">
+            <h1 className="text-xl font-semibold text-gray-900">
+              {"Greetings!!"}
+            </h1>
+
+            <div className="flex items-center gap-3">
+              <NotificationBell pollIntervalMs={30000} />
+            </div>
+          </div>
+
+          {children}
+        </div>
+        {/* <div className="p-4 sm:p-6 lg:p-8">{children}</div> */}
       </div>
     </div>
   );

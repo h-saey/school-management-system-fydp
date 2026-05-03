@@ -16,6 +16,7 @@ import { BehaviourComplaints } from "./BehaviourComplaints";
 import { DigitalNoticeboard } from "./DigitalNoticeboard";
 import { ResponsiveDashboard } from "../ResponsiveDashboard";
 import { ComplaintSubmission } from "./ComplaintSubmission";
+import { NotificationBell } from "../NotificationBell";
 
 interface ParentDashboardProps {
   user: User;

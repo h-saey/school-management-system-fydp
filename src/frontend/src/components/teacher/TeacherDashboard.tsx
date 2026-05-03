@@ -18,6 +18,7 @@ import { PostAnnouncements } from "./PostAnnouncements";
 //import { ParentMessages } from "./ParentMessages";
 import { ComplaintManagement } from "./ComplaintManagement";
 import { ResponsiveDashboard } from "../ResponsiveDashboard";
+import { NotificationBell } from "../NotificationBell";
 
 interface TeacherDashboardProps {
   user: User;
@@ -53,23 +54,30 @@ export function TeacherDashboard({ user, onLogout }: TeacherDashboardProps) {
   ];
 
   return (
-    <ResponsiveDashboard
-      user={user}
-      onLogout={onLogout}
-      menuItems={menuItems}
-      currentPage={currentPage}
-      onPageChange={(page) => setCurrentPage(page as Page)}
-      roleColor="purple"
-      subtitle="Teacher Portal"
-    >
-      {currentPage === "dashboard" && <TeacherDashboardOverview />}
-      {currentPage === "attendance" && <MarkAttendance />}
-      {currentPage === "marks" && <EnterMarks />}
-      {currentPage === "certificates" && <UploadCertificates />}
-      {currentPage === "behavior-remarks" && <BehaviorRemarks />}
-      {currentPage === "announcements" && <PostAnnouncements />}
-      {/* {currentPage === "messages" && <ParentMessages />} */}
-      {currentPage === "complaints" && <ComplaintManagement />}
-    </ResponsiveDashboard>
+    <>
+      <ResponsiveDashboard
+        user={user}
+        onLogout={onLogout}
+        menuItems={menuItems}
+        currentPage={currentPage}
+        onPageChange={(page) => setCurrentPage(page as Page)}
+        roleColor="purple"
+        subtitle="Teacher Portal"
+      >
+        {currentPage === "dashboard" && <TeacherDashboardOverview />}
+        {currentPage === "attendance" && <MarkAttendance />}
+        {currentPage === "marks" && <EnterMarks />}
+        {currentPage === "certificates" && <UploadCertificates />}
+        {currentPage === "behavior-remarks" && <BehaviorRemarks />}
+        {currentPage === "announcements" && <PostAnnouncements />}
+        {/* {currentPage === "messages" && <ParentMessages />} */}
+        {currentPage === "complaints" && <ComplaintManagement />}
+      </ResponsiveDashboard>
+      {/* <div
+        style={{ position: "fixed", top: "12px", right: "80px", zIndex: 9000 }}
+      >
+        <NotificationBell pollIntervalMs={30000} />
+      </div> */}
+    </>
   );
 }

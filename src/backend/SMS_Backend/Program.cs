@@ -108,7 +108,7 @@ builder.Services.AddScoped<SMS_Backend.Services.SimulationService>();
 builder.Services.AddSingleton<SMS_Backend.ML.ModelTrainer>();
 builder.Services.AddScoped<AuditLogService>();
 builder.Services.AddScoped<RiskNotificationService>();
-// (RiskService, RecommendationService, SimulationService already there)
+
 
 builder.Services.AddAuthorization();
 builder.Services.AddScoped<JwtService>();

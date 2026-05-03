@@ -88,6 +88,28 @@ namespace SMS_Backend.Controllers
             });
         }
 
+        // Used by AI panel to resolve roll number → studentId
+        [HttpGet("by-roll/{rollNumber}")]
+        [Authorize(Roles = "Admin,Teacher")]
+        public async Task<IActionResult> GetStudentByRollNumber(string rollNumber)
+        {
+            var student = await _context.Students
+                .FirstOrDefaultAsync(s => s.RollNumber == rollNumber.Trim());
+
+            if (student == null)
+                return NotFound(new { message = $"No student found with roll number '{rollNumber}'." });
+
+            return Ok(new
+            {
+                student.StudentId,
+                student.FirstName,
+                student.LastName,
+                student.Class,
+                student.Section,
+                student.RollNumber
+            });
+        }
+
         // ── GET api/student/me ──────────────────────────────────────────
         // Student views their own profile using the JWT token
         [HttpGet("me")]
