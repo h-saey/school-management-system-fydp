@@ -48,7 +48,8 @@ export function ManageParents() {
   const [fetching, setFetching] = useState(true);
   const [newParent, setNewParent] = useState(emptyForm);
 
-  const API_BASE = "http://localhost:5036/api";
+  //const API_BASE = "http://localhost:5036/api";
+  const API_BASE = "/api";
   const getToken = () => localStorage.getItem("token") ?? "";
   const authH = () => ({
     "Content-Type": "application/json",

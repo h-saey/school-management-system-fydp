@@ -1,10 +1,5 @@
-// FILE: src/api/teacherApi.ts
-// ACTION: CREATE this new file at src/api/teacherApi.ts
-// This is the central API layer used by ALL teacher components.
-// Replace "http://localhost:5000" with your actual backend URL if different.
-
-export const API_BASE = "http://localhost:5036/api";
-
+//export const API_BASE = "http://localhost:5036/api";
+export const API_BASE = "/api";
 // ─── Token Helper ──────────────────────────────────────────────────────────
 
 const getToken = (): string => localStorage.getItem("token") ?? "";

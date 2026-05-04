@@ -4,7 +4,8 @@ import path from "path";
 
 export default defineConfig({
   plugins: [react()],
-  base: "/school-management-system-fydp/",
+  //base: "/school-management-system-fydp/",
+  base: "/",
   resolve: {
     extensions: [".js", ".jsx", ".ts", ".tsx", ".json"],
     alias: {
@@ -54,8 +55,19 @@ export default defineConfig({
     target: "esnext",
     outDir: "build",
   },
+  // server: {
+  //   port: 3000,
+  //   open: true,
+  // },
+  // server: {
+  //   host: true,
+  //   port: 5173,
+  //   strictPort: true,
+  // },
   server: {
-    port: 3000,
-    open: true,
+    host: "0.0.0.0",
+    port: 5173,
+    strictPort: true,
+    allowedHosts: true,
   },
 });

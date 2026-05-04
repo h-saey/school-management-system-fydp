@@ -76,9 +76,17 @@ builder.Services.AddCors(options =>
 
 
 
+//builder.Services.AddDbContext<ApplicationDbContext>(options =>
+//    options.UseSqlServer(
+//        builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
+{
     options.UseSqlServer(
-        builder.Configuration.GetConnectionString("DefaultConnection")));
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        sqlOptions => sqlOptions.EnableRetryOnFailure()
+    );
+});
+
 
 
 //Configuring JWT in Program.cs
@@ -120,20 +128,24 @@ using (var scope = app.Services.CreateScope())
     var services = scope.ServiceProvider;
     var context = services.GetRequiredService<ApplicationDbContext>();
 
-    DbInitializer.Seed(context);
+    //if (!context.Users.Any())
+    //{
+    //    DbInitializer.Seed(context);
+    //}
+
 }
 
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-//app.UseSwagger();
-// app.UseSwaggerUI();
+//if (app.Environment.IsDevelopment())
+//{
+//    app.UseSwagger();
+//    app.UseSwaggerUI();
+//}
+app.UseSwagger();
+app.UseSwaggerUI();
 //app.UseHttpsRedirection();
-app.UseRouting();
+//app.UseRouting();
 
 app.UseCors("AllowAll");
 
@@ -145,6 +157,7 @@ app.UseAuthorization();
 app.MapControllers();
 
 
+app.Urls.Add("http://0.0.0.0:8080");
 
 
 app.Run();

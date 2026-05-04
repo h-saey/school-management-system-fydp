@@ -29,7 +29,8 @@ interface AIPanelProps {
   userRole: UserRoleForAI;
 }
 
-const API_BASE = "http://localhost:5036/api";
+//const API_BASE = "http://localhost:5036/api";
+const API_BASE = "/api";
 const getToken = () => localStorage.getItem("token") ?? "";
 
 const riskColor = (level: string) =>

@@ -4,7 +4,7 @@
 // // ============================================================
 
 // export const API_BASE = "http://localhost:5036/api";
-// //export const API_BASE = "http://localhost:5000/api";
+// //export const API_BASE = "/api";
 // //export const API_BASE = "https://passcode-kinship-starboard.ngrok-free.dev/api";
 
 // const getToken = (): string => localStorage.getItem("token") ?? "";
@@ -222,7 +222,8 @@
 //  api.ts — Central API service
 // ============================================================
 
-export const API_BASE = "http://localhost:5036/api";
+//export const API_BASE = "http://localhost:5036/api";
+export const API_BASE = "/api";
 
 const getToken = (): string => localStorage.getItem("token") ?? "";
 

@@ -3,8 +3,8 @@
 //  Uses Bearer JWT from localStorage
 // ============================================================
 
-export const API_BASE = "http://localhost:5036/api";
-
+//export const API_BASE = "http://localhost:5036/api";
+export const API_BASE = "/api";
 const getToken = (): string => localStorage.getItem("token") ?? "";
 
 const authHeaders = (): HeadersInit => ({
